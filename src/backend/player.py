@@ -22,7 +22,7 @@ class Piece(object):
         pass
 
     def __str__(self):
-        return f"Piece :Color({self.color}) size({self.size.name})"
+        return f"Piece :Color({self.color.name}) size({self.size.name})"
 
 
 class Player:
@@ -36,10 +36,10 @@ class Player:
         self.__initialize_pieces()
 
     def __initialize_pieces(self) -> None:
-        full_stack_pieces = []
-        for size in self.all_pieces:
-            full_stack_pieces.append(Piece(self.color, size))
         for i in range(3):
+            full_stack_pieces = []
+            for size in self.all_pieces:
+                full_stack_pieces.append(Piece(self.color, size))
             self.pieces.append(full_stack_pieces)
 
     def remove_from_external_stack(self, raw_number: int) -> Piece | None:
@@ -53,6 +53,12 @@ class Player:
     def __str__(self):
         pass
 
+    def print_pieces(self):
+        for i in range(len(self.pieces)):
+            for j in range(len(self.pieces[i])):
+                print(self.pieces[i][j], end=' ')
+            print('\n')
+
 
 class Person(Player):
     def __init__(self, color: Color, name: str):
@@ -65,5 +71,11 @@ class Person(Player):
 
 
 if __name__ == '__main__':
-    pass
+    p = Person(color=Color.WHITE, name='ahmed')
 
+    p.remove_from_external_stack(1)
+    p.print_pieces()
+    p.remove_from_external_stack(1)
+    p.remove_from_external_stack(1)
+    # p.remove_from_external_stack(1)
+    p.print_pieces()
