@@ -25,8 +25,9 @@ class Piece(object):
         return f"Piece :Color({self.color}) size({self.size.name})"
 
 
-class Player(object):
+class Player:
     def __init__(self, color: Color):
+
         self.color: Color = color
         self.pieces: list[list] = []
         self.initial_state = None
@@ -53,5 +54,16 @@ class Player(object):
         pass
 
 
+class Person(Player):
+    def __init__(self, color: Color, name: str):
+        super().__init__(color)
+        self.name = name
+        self.icon = None
+
+    def __str__(self):
+        return f"Person: name({self.name}) color({self.color})"
+
+
 if __name__ == '__main__':
     pass
+
