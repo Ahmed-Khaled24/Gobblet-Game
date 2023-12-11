@@ -1,6 +1,10 @@
-from backend.board import Board
-from backend.player import *
-from utils.gameModesEnum import *
+from src.backend.board import Board
+from src.backend.player import *
+from src.utils.gameModesEnum import *
+
+from src.backend.player import Person, Color, Piece
+from src.utils.gameModesEnum import GameModes
+
 
 class Game:
     def __init__(self, mode: GameModes, player1Name: str, player2Name: str, player1Color: Color, player2Color: Color):
@@ -26,12 +30,12 @@ class Game:
         " Move already existent gobblet to new location "
         pass
     
-    def statusCheck():
+    def statusCheck(self):
         pass
     
-    def drawState():
+    def drawState(self):
         pass
     
-    def winState():
+    def winState(self):
         pass
     

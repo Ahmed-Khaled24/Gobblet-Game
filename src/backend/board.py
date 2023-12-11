@@ -1,5 +1,5 @@
-from backend.player import Piece
-from utils.invalidMoveException import InvalidMoveException
+from src.backend.player import Piece
+from src.utils.invalidMoveException import InvalidMoveException
 
 class Board:
     # Use list as a stack push === append, pop === pop 
