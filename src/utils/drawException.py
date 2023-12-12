@@ -1,0 +1,2 @@
+class DrawException(Exception):
+    pass

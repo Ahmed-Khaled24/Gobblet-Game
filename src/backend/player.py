@@ -1,5 +1,6 @@
 from enum import Enum
-
+from typing import Tuple, Optional
+from src.utils.drawException import DrawException
 
 class PieceSize(Enum):
     VERYSMALL: int = 0
@@ -7,7 +8,6 @@ class PieceSize(Enum):
     MEDIUM: int = 2
     LARGE: int = 3
 
-    
     def __lt__(self, other):
         if self.__class__ is other.__class__:
             return self.value < other.value
@@ -22,7 +22,7 @@ class PieceSize(Enum):
 class Color(Enum):
     WHITE: int = 0
     BLACK: int = 1
-    
+
     def __eq__(self, other):
         if self.__class__ is other.__class__:
             return self.value == other.value
@@ -33,12 +33,40 @@ class Piece(object):
     def __init__(self, color: Color, size: PieceSize):
         self.color = color
         self.size = size
+        self.counter_for_draw = 0
+        self.prev_pos: Optional[Tuple[int, int]] = None
+        self.cur_pos: Optional[Tuple[int, int]] = None
 
     def __del__(self):
         pass
 
     def __str__(self):
         return f"Piece :Color({self.color.name}) size({self.size.name})"
+
+
+    def __update_safely(self, new_pos: Tuple[int, int]):
+        self.prev_pos = self.cur_pos
+        self.cur_pos = new_pos
+
+    def update_pos(self, new_pos: Tuple[int, int]):
+        """
+        updating the position of the gobblet safely by tracking the draw situation that will be caused if 3 repetition of the same piece has occurred
+        :param new_pos tuple of x and y that will move the Gobblet to it
+        """
+        if not self.cur_pos:
+            self.cur_pos = new_pos
+        else:
+            if not self.prev_pos:
+                self.__update_safely(new_pos)
+            else:
+                if self.prev_pos == new_pos and (self.counter_for_draw + 1) % 6 != 0:
+                    self.counter_for_draw += 1
+                    self.__update_safely(new_pos)
+                elif self.prev_pos != new_pos:
+                    self.counter_for_draw = 0
+                    self.__update_safely(new_pos)
+                else:
+                    raise DrawException("Draw Situation!")
 
 
 class Player:
