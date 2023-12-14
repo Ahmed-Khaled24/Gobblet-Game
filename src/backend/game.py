@@ -22,13 +22,13 @@ class Game:
         
         self.turn = self.player1 if player1Color == Color.WHITE else self.player2
         
-    def addGobblet(piece: Piece, row: int, column: int):
+    def addGobblet(self, row: int, column: int, piece: Piece):
         " Add gobblet from the external stack "
-        pass
+        self.board.addPiece(row, column, piece)
     
-    def moveGobblet(piece: Piece, newRow: int, newColumn: int):
+    def moveGobblet(self, oldRow: int, oldColumn: int, newRow: int, newColumn: int):
         " Move already existent gobblet to new location "
-        pass
+        self.board.movePiece(oldRow, oldColumn, newRow, newColumn)
     
     def statusCheck(self):
         pass
@@ -37,5 +37,15 @@ class Game:
         pass
     
     def winState(self):
-        pass
-    
+        white = self.board.getLinedUpGobblets(Color.WHITE)
+        black = self.board.getLinedUpGobblets(Color.BLACK)
+        
+        white = [gobblet for gobblet in white if len(gobblet) == 4]
+        black = [gobblet for gobblet in black if len(gobblet) == 4]
+        
+        if len(white) > 0:
+            return self.player1 if self.player1.color == Color.WHITE else self.player2
+        elif len(black) > 0:
+            return self.player1 if self.player1.color == Color.BLACK else self.player2
+        else:
+            return None
