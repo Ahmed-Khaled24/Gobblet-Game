@@ -20,8 +20,7 @@ class Game:
             self.player1 = None #TODO: Use the Ai Class when implemented
             self.player2 = None #TODO: Use the Ai Class when implemented
         
-        self.turn = self.player1 if player1Color == Color.WHITE else self.player2
-        
+
     def addGobblet(self, row: int, column: int, piece: Piece):
         " Add gobblet from the external stack "
         self.board.addPiece(row, column, piece)

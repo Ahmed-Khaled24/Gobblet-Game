@@ -3,10 +3,10 @@ from typing import Tuple, Optional
 from src.utils.drawException import DrawException
 
 class PieceSize(Enum):
-    VERYSMALL: int = 0
-    SMALL: int = 1
-    MEDIUM: int = 2
-    LARGE: int = 3
+    VERYSMALL: int = 1
+    SMALL: int = 2
+    MEDIUM: int = 3
+    LARGE: int = 4
 
     def __lt__(self, other):
         if self.__class__ is other.__class__:
@@ -20,8 +20,8 @@ class PieceSize(Enum):
 
 
 class Color(Enum):
-    WHITE: int = 0
-    BLACK: int = 1
+    WHITE: str = 'R'
+    BLACK: str = 'B'
 
     def __eq__(self, other):
         if self.__class__ is other.__class__:
@@ -102,6 +102,9 @@ class Player:
             for j in range(len(self.pieces[i])):
                 print(self.pieces[i][j], end=' ')
             print('\n')
+
+    def getSize(piece):
+        return piece.value
 
 
 class Person(Player):
