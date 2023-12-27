@@ -2,6 +2,7 @@ from enum import Enum
 from typing import Tuple, Optional
 from src.utils.drawException import DrawException
 
+
 class PieceSize(Enum):
     VERYSMALL: int = 1
     SMALL: int = 2
@@ -42,7 +43,6 @@ class Piece(object):
 
     def __str__(self):
         return f"Piece :Color({self.color.name}) size({self.size.name})"
-
 
     def __update_safely(self, new_pos: Tuple[int, int]):
         self.prev_pos = self.cur_pos
@@ -108,7 +108,7 @@ class Player:
 
 
 class Person(Player):
-    def __init__(self, color: Color, name: str):
+    def __init__(self, color: Color, name: str = None):
         super().__init__(color)
         self.name = name
         self.icon = None
