@@ -1,6 +1,6 @@
 import uuid
 
-from player import *
+from src.backend.player import *
 from uuid import uuid1
 
 class AI(Player):
