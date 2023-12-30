@@ -16,9 +16,9 @@ class Board:
         assert isinstance(piece, Piece)
         assert 0 <= external_row < 3
 
-        # 1 []
-        # 2 []
-        # 3 []
+        # 1 [4 Pieces]
+        # 2 [4 Pieces]
+        # 3 [4 Pieces]
 
         if self.grid[row][column][-1] is None:
             self.grid[row][column].append(piece)
@@ -111,17 +111,19 @@ class Board:
     def movePiece(self, oldRow: int, oldColumn: int, newRow: int, newColumn: int):
         """ Move a piece that is already on the board """
 
-        piece = self.grid[oldRow][oldColumn][-1]
+        piece: Piece = self.grid[oldRow][oldColumn][-1]
         assert piece is not None
 
         self.grid[oldRow][oldColumn].pop()
 
         if self.grid[newRow][newColumn][-1] is None:
             self.grid[newRow][newColumn].append(piece)
+            piece.update_pos((newRow, newColumn))
         else:
             existingPiece = self.grid[newRow][newColumn][-1]
             if piece.size > existingPiece.size:
                 self.grid[newRow][newColumn].append(piece)
+                piece.update_pos((newRow, newColumn))
             else:
                 raise InvalidMoveException("Invalid move, you can't add your piece on top of larger piece.")
 
