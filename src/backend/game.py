@@ -6,7 +6,7 @@ from src.backend.player import Person, Color, Piece
 from src.utils.gameModesEnum import GameModes
 from src.utils.drawException import DrawException
 from src.backend.ai_player import AI
-from src.utils.invalidMoveException import InvalidMoveException
+from src.utils.invalidMoveException import InvalidMoveException,InvalidMovementSamePositionException
 
 
 class GameStatus(Enum):
@@ -63,6 +63,7 @@ class Game:
             self.game_status = GameStatus.Win
             print(invalidMove)
 
+
     def moveGobblet(self, oldRow: int, oldColumn: int, newRow: int, newColumn: int):
         " Move already existent gobblet to new location "
         try:
@@ -71,6 +72,8 @@ class Game:
         except DrawException as errDraw:
             self.game_status = GameStatus.Draw
             print(errDraw)
+        except InvalidMovementSamePositionException as sameMoveExp:
+            print(sameMoveExp)
         except InvalidMoveException as invalidMove:
             self.winner = self.player2 if self.turn == self.player1.color else self.player1
             self.game_status = GameStatus.Win
@@ -99,7 +102,8 @@ class Game:
 
 if __name__ == '__main__':
     pass
-
     # game = Game(GameModes.HumanVsHuman,"","",Color.WHITE,Color.BLACK)
     # game.game_status = GameStatus.Win
     # print(game.statusCheck())
+    # game.moveGobblet(0,0,0,0)
+    # game.moveGobblet(0,0,1,1)

@@ -1,6 +1,9 @@
 from src.backend.player import Piece
-from src.utils.invalidMoveException import InvalidMoveException
+from src.utils.invalidMoveException import InvalidMoveException,InvalidMovementSamePositionException
 from src.backend.player import Color, Player
+
+
+
 
 
 class Board:
@@ -110,6 +113,8 @@ class Board:
 
     def movePiece(self, oldRow: int, oldColumn: int, newRow: int, newColumn: int):
         """ Move a piece that is already on the board """
+        if (oldRow, oldColumn) == (newRow, newColumn):
+            raise InvalidMovementSamePositionException('Invalid move, Due to same position!')
 
         piece: Piece = self.grid[oldRow][oldColumn][-1]
         assert piece is not None
