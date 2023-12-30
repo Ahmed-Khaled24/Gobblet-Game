@@ -75,7 +75,7 @@ class Human:
                 if game.turn.value == 'R':
                     if (x - 540) ** 2 + (y - (40 + (STACK_DISTANCE * (2 - i)))) ** 2 <= (9 * 4) ** 2:
                         self.selected = True
-        return False
+        return self.selected
 
     def on_loop(self, game: Game):
         x, y = pygame.mouse.get_pos()

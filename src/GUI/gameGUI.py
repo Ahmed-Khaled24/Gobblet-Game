@@ -35,7 +35,7 @@ class GUI:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 self._running = False
-        self.Human.on_event(event, self.game)
+        self.selected = self.Human.on_event(event, self.game)
 
     def on_loop(self):
         self.Human.on_loop(self.game)
@@ -52,21 +52,21 @@ class GUI:
                                        9 * self.game.board.grid[i][j][-1].size.value)
         for i in range(3):
             if len(self.game.player2.pieces[i]) > 0:
-                pygame.draw.circle(self.win, COLOURS['B'], (self.left - 60, self.top + 200 + 80 * i),
+                pygame.draw.circle(self.win, COLOURS['B'], (100, (280 + (80 * i))),
                                    9 * self.game.player2.pieces[i][-1].size.value)
 
         for i in range(3):
             if len(self.game.player1.pieces[i]) > 0:
-                pygame.draw.circle(self.win, COLOURS['R'], (self.left + 360, self.top + 120 - 80 * i),
+                pygame.draw.circle(self.win, COLOURS['R'], (540, (40 + 80 * (2 - i))),
                                    9 * self.game.player1.pieces[i][-1].size.value)
 
-        # if self.selected:
-        #     pc, pr = pygame.mouse.get_pos()
-        #     pw = 60
-        #     ph = pw
-        #     pr -= ph // 2
-        #     pc -= pw // 2
-        #     pygame.draw.circle(self.win, COLOURS[game.turn.value], (pc + pw // 2, pr + ph // 2), min(ph, pw) // 2)
+        if self.selected:
+            pc, pr = pygame.mouse.get_pos()
+            pw = 60
+            ph = pw
+            pr -= ph // 2
+            pc -= pw // 2
+            pygame.draw.circle(self.win, COLOURS[self.game.turn.value], (pc + pw // 2, pr + ph // 2), min(ph, pw) // 2)
         size, text = self.turns[self.game.turn.value]
         tw, th = size
         offset = (50 - th)
@@ -80,7 +80,7 @@ class GUI:
     def on_execute(self, game: Game):
         if self.on_init() == False:
             self._running = False
-        self.game=game
+        self.game = game
         while self._running:
             self.render()
             for event in pygame.event.get():
