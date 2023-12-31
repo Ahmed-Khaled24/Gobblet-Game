@@ -1,6 +1,7 @@
 import pygame
 from pygame.locals import *
-from src.backend.game import Game
+from src.GUI.status_box import WinnerBox
+from src.backend.game import Game, GameStatus
 
 CIRCLE_ON_BOARD = USEREVENT + 2
 BLACK_STACKS = USEREVENT + 3
@@ -49,22 +50,32 @@ class Human:
                                 if game.turn.value == game.board.grid[i][j][-1].color.value:
                                     self.selected = True
                     else:
-                        try:
-                            if Rect(self.left + STACK_DISTANCE * i, self.top + STACK_DISTANCE * j, STACK_DISTANCE,
-                                    STACK_DISTANCE).collidepoint(x, y):
-                                if self._j == BLACK_STACK_Y:
-                                    game.addGobblet(i, j, game.player2.pieces[-(self._i + 2)][-1], -(self._i + 2))
+                        if Rect(self.left + STACK_DISTANCE * i, self.top + STACK_DISTANCE * j, STACK_DISTANCE,
+                                STACK_DISTANCE).collidepoint(x, y):
+                            if self._j == BLACK_STACK_Y:
+                                game.addGobblet(i, j, game.player2.pieces[-(self._i + 2)][-1], -(self._i + 2))
 
-                                elif self._j == RED_STACK_Y:
-                                    game.addGobblet(i, j, game.player1.pieces[self._i - 4][-1], self._i - 4)
+                            elif self._j == RED_STACK_Y:
+                                game.addGobblet(i, j, game.player1.pieces[self._i - 4][-1], self._i - 4)
 
-                                else:
-                                    game.moveGobblet(self._i, self._j, i, j)
-                                self.selected = False
-                                game.statusCheck()
-                                return True
-                        except Exception:
-                            pass
+                            else:
+                                game.moveGobblet(self._i, self._j, i, j)
+                            self.selected = False
+                            game.statusCheck()
+                            print(game.game_status)
+                            if game.game_status == GameStatus.Win:
+                                print("Winner is:")
+                                print(game.winner.color.value)
+                                try: 
+                                    screen = pygame.display.get_surface()
+                                    WinnerBox(screen).draw_winner_box(game.winner.color.value, game.winner.name)
+                                except Exception as e:
+                                    print("Error in WinnerBox")
+                                    print(e)
+                            elif game.game_status == GameStatus.Draw:
+                                pass
+                            return True
+
 
             for i in range(3):
                 if game.turn.value == 'B':
