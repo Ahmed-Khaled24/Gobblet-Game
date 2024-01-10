@@ -9,6 +9,9 @@ class PieceSize(Enum):
     MEDIUM: int = 3
     LARGE: int = 4
 
+    def __str__(self):
+        return self.name
+
     def __lt__(self, other):
         if self.__class__ is other.__class__:
             return self.value < other.value
@@ -24,6 +27,9 @@ class Color(Enum):
     WHITE: str = 'R'
     BLACK: str = 'B'
 
+    def __str__(self):
+        return self.value
+    
     def __eq__(self, other):
         if self.__class__ is other.__class__:
             return self.value == other.value
@@ -31,7 +37,9 @@ class Color(Enum):
 
 
 class Piece(object):
-    def __init__(self, color: Color, size: PieceSize):
+    def __init__(self, color: Color, size: PieceSize, externalStackIndex: int = -111):
+        self.id = f'{color.__str__()}-{size.__str__()}-{externalStackIndex}'
+        self.externalStackIndex = externalStackIndex
         self.color = color
         self.size = size
         self.counter_for_draw = 0
@@ -41,8 +49,8 @@ class Piece(object):
     def __del__(self):
         pass
 
-    def __str__(self):
-        return f"Piece :Color({self.color.name}) size({self.size.name})"
+    def __repr__(self):
+        return self.id
 
     def __update_safely(self, new_pos: Tuple[int, int]):
         self.prev_pos = self.cur_pos
@@ -83,7 +91,7 @@ class Player:
         for i in range(3):
             full_stack_pieces = []
             for size in self.all_pieces:
-                full_stack_pieces.append(Piece(self.color, size))
+                full_stack_pieces.append(Piece(self.color, size, i))
             self.pieces.append(full_stack_pieces)
 
     def remove_from_external_stack(self, raw_number: int) -> Piece | None:
