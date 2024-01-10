@@ -1,3 +1,4 @@
+from copy import deepcopy
 from src.backend.board import Board
 from src.backend.player import *
 from src.utils.gameModesEnum import *
@@ -18,6 +19,27 @@ class GameStatus(Enum):
         if self.__class__ is other.__class__:
             return self.value == other.value
         return NotImplemented
+
+
+class MoveType(Enum):
+    ADD = 1
+    MOVE = 2
+
+    def __eq__(self, other):
+        if self.__class__ is other.__class__:
+            return self.value == other.value
+        return NotImplemented
+    
+class Move:
+    def __init__(self, type: MoveType, piece: Piece, row: int, column: int, external_row: int = None):
+        self.type = type
+        self.piece = piece
+        self.row = row
+        self.column = column
+        external_row = external_row
+        
+    def __str__(self):
+        return f'{self.type} {self.piece} to ({self.row}, {self.column})'
 
 
 class Game:
@@ -47,7 +69,7 @@ class Game:
     # 0 <= row <4
     # 0 <= Col <4
     # 0 <= external_row < 3
-    def addGobblet(self, row: int, column: int, piece: Piece, external_row: int):
+    def addGobblet(self, row: int, column: int, piece: Piece, external_row: int, virtual: bool = False):
         " Add gobblet from the external stack "
         try:
             if piece.color == self.player1.color:
@@ -55,6 +77,7 @@ class Game:
             else:
                 self.board.addPiece(row, column, piece, self.player2, external_row)
             self.__changeTurn()
+            self.winState()
         except DrawException as err:
             self.game_status = GameStatus.Draw
             print(err)
@@ -69,6 +92,7 @@ class Game:
         try:
             self.board.movePiece(oldRow, oldColumn, newRow, newColumn)
             self.__changeTurn()
+            self.winState()
         except DrawException as errDraw:
             self.game_status = GameStatus.Draw
             print(errDraw)
@@ -79,11 +103,13 @@ class Game:
             self.game_status = GameStatus.Win
             print(invalidMove)
 
+
     def statusCheck(self) -> Tuple[Optional[Player], GameStatus]:
         if self.game_status == GameStatus.Win:
             return self.winner, self.game_status
         else:
             return None, self.game_status
+
 
     def winState(self):
         white = self.board.getLinedUpGobblets(Color.WHITE)
@@ -100,6 +126,97 @@ class Game:
             self.game_status = GameStatus.Win
 
 
+    def __getAvailableMoves(self, currentBoard: Board, currentPlayer: AI) -> list[Move]:
+        '''
+            Returns a list of all possible moves for the current player.
+            NOTE: This function currently only checks for the empty cells on the board and return moves for adding a piece from the external stack.
+            We need to add the moves for moving a piece on the board. or adding piece from external stack on top of another piece.
+            I believe اننا نمشي نفسنا كده و خلاص
+        '''
+        moves = []
+        piece: Piece = None
+        for row in currentPlayer.pieces: # Trivial way to get the piece to play
+            if len(row) > 0:
+                piece = row[-1]
+                break
+            
+        for row in range(4):
+            for column in range(4):
+                if currentBoard.grid[row][column][-1] is None:
+                    moves.append(Move(MoveType.ADD, piece, row, column, piece.externalStackIndex))
+        
+        return moves
+
+
+    def __makeMove(self, currentBoard: Board, move: Move) -> Board:
+        '''This function creates a deep copy of the current board and makes the given move on the copy.
+        then return the new board to perform the minimax algorithm on it.'''
+        newBoard = deepcopy(currentBoard)
+        if move.type == MoveType.ADD:
+            currentPlayer = self.player1 if move.piece.color == self.player1.color else self.player2
+            newBoard.addPiece(move.row, move.column, move.piece, currentPlayer, move.piece.externalStackIndex, isVirtualMove=True)
+        ## if we handle the move piece moves we need to add extra code here but نمشي نفسنا
+        return newBoard
+         
+    
+    def __evaluate(self, board: Board, player: AI) -> int: 
+        '''
+            This is the static evaluation function (heuristic) for the minimax algorithm. 
+            It returns a number that represents the score of the current board state for the given player. 
+            The higher the number, the better the move is for the player. The lower the number, 
+            the worse the board is for the player.
+            The algorithm used here is a trivial one. You can improve it to get better results.
+            Add points for each piece the player has on the board, and subtract points for each piece the opponent has on the board.
+            Possible improvements:
+                1. Add more points if the AI has three pieces in a row, column, or diagonal
+                2. Subtract more points if the opponent has three pieces in a row, column, or diagonal
+        '''
+        score = 0
+        for row in self.board.grid:  
+            for cell in row:
+                piece = cell[-1]
+                if piece is None: continue
+                if piece.color == player.color:
+                    score += 1
+                else:
+                    score -= 1 
+
+        return score
+    
+    
+    def __minimax(self, currentBoard: Board,  currentPlayer: AI, maxDepth: int, currentDepth: int) -> (int, Move):
+        '''This function is the minimax algorithm. It returns the best move for the given player.'''
+        
+        ## Base case
+        if currentDepth == maxDepth:
+            return self.__evaluate(currentBoard, currentPlayer), None
+
+        ## Bubble up the best move
+        bestMove = None
+        bestScore = -10e12 if currentPlayer.color == self.turn else 10e12
+        
+        for move in self.__getAvailableMoves(currentBoard, currentPlayer):
+            newBoard = self.__makeMove(currentBoard, move)
+            nextPlayer = self.player1 if currentPlayer.color == self.player2.color else self.player2
+            currentScore, currentMove = self.__minimax(newBoard, nextPlayer, maxDepth, currentDepth + 1)
+            if currentPlayer.color == self.turn: # Maximizing player
+                if currentScore > bestScore:
+                    bestScore = currentScore
+                    bestMove = move
+            else: # Minimizing player
+                if currentScore < bestScore:
+                    bestScore = currentScore
+                    bestMove = move
+        
+        return bestScore, bestMove
+        
+    
+    def getBestMove(self, player: AI) -> Move: 
+        '''This function is the interface for the minimax algorithm.'''
+        score, move = self.__minimax(self.board, player, player.difficulty, 0) # maxDepth is the difficulty level
+        return move
+    
+ 
 if __name__ == '__main__':
     pass
     # game = Game(GameModes.HumanVsHuman,"","",Color.WHITE,Color.BLACK)
