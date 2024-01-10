@@ -3,16 +3,19 @@ from src.utils.invalidMoveException import InvalidMoveException,InvalidMovementS
 from src.backend.player import Color, Player
 
 
-
-
-
 class Board:
     # Use list as a stack push === append, pop === pop 
     def __init__(self):
         # Initializing all 4x4 cells to None
         self.grid = [[[None] for _ in range(4)] for _ in range(4)]
 
-    def addPiece(self, row: int, column: int, piece: Piece, player: Player, external_row: int):
+    def __str__(self):
+        string = ""
+        for row in self.grid:
+            string += f"{ [cell for cell in row]}\n"
+        return string
+    
+    def addPiece(self, row: int, column: int, piece: Piece, player: Player, external_row: int, isVirtualMove: bool = False):
         """ Add piece from your external stack to the board """
 
         assert row < 4 and column < 4
@@ -25,7 +28,8 @@ class Board:
 
         if self.grid[row][column][-1] is None:
             self.grid[row][column].append(piece)
-            player.remove_from_external_stack(raw_number=external_row)
+            if not isVirtualMove:
+                player.remove_from_external_stack(raw_number=external_row)
             piece.update_pos((row, column))
         else:
             linedUpGobblets = self.getLinedUpGobblets(Color.WHITE if piece.color == Color.BLACK else Color.BLACK)
@@ -34,7 +38,8 @@ class Board:
                 existingPiece = self.grid[row][column][-1]
                 if piece.size > existingPiece.size:
                     self.grid[row][column].append(piece)
-                    player.remove_from_external_stack(raw_number=external_row)
+                    if not isVirtualMove:
+                        player.remove_from_external_stack(raw_number=external_row)
                 else:
                     raise InvalidMoveException("Invalid move, you can't add your piece on top of larger piece.")
             else:
@@ -42,7 +47,7 @@ class Board:
                     "Invalid move, you can't add your piece on top of another piece, unless there are 3 lined up.")
 
     def getLinedUpGobblets(self, color: Color) -> list[list[tuple[int, int]]]:
-        """ Returns a list of tuples containing the coordinates of the lined up gobblets """
+        """ Returns a list of list of tuples containing the coordinates of the lined up gobblets """
         linedUpGobbles = []
 
         # Count the total number of gobblets of the given color, if less than 3, then we don't care yet.
@@ -98,8 +103,7 @@ class Board:
             if len(temp) == acceptedLength:
                 linedUpGobbles.append(temp)
 
-                # Right diagonals
-
+        # Right diagonals
         scanDiagonal(startRow=2, startColumn=0, rowLimit=0, columnLimit=2, acceptedLength=3, leftDiagonal=False)
         scanDiagonal(startRow=3, startColumn=0, rowLimit=0, columnLimit=3, acceptedLength=4, leftDiagonal=False)
         scanDiagonal(startRow=3, startColumn=1, rowLimit=1, columnLimit=3, acceptedLength=3, leftDiagonal=False)
