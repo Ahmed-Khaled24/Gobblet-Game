@@ -168,6 +168,9 @@ class Game:
     def __makeMove(self, currentBoard: Board, move: Move) -> Board:
         """This function creates a deep copy of the current board and makes the given move on the copy.
         then return the new board to perform the minimax algorithm on it."""
+        assert move is not None
+        assert currentBoard is not None
+        
         newBoard = deepcopy(currentBoard)
         if move.type == MoveType.ADD:
             currentPlayer = (
@@ -181,7 +184,7 @@ class Game:
                 move.piece.externalStackIndex,
                 isVirtualMove=True,
             )
-        ## if we handle the move piece moves we need to add extra code here but نمشي نفسنا
+        ## if we handle the move piece, we need to add extra code here but نمشي نفسنا
         return newBoard
 
     def __evaluate(self, board: Board, player: AI) -> int:
@@ -215,14 +218,14 @@ class Game:
         """This function is the minimax algorithm. It returns the best move for the given player."""
 
         ## Base case
-        if currentDepth == maxDepth:
+        possibleMoves = self.__getAvailableMoves(currentBoard, currentPlayer) ## If this returns empty list then this is a terminal state.
+        if currentDepth == maxDepth or len(possibleMoves) == 0:
             return self.__evaluate(currentBoard, currentPlayer), None
 
         ## Bubble up the best move
         bestMove = None
         bestScore = -10e12 if currentPlayer.color == self.turn else 10e12
-
-        for move in self.__getAvailableMoves(currentBoard, currentPlayer):
+        for move in possibleMoves:
             newBoard = self.__makeMove(currentBoard, move)
             nextPlayer = (
                 self.player1
@@ -248,6 +251,7 @@ class Game:
         score, move = self.__minimax(
             self.board, player, player.difficulty, 0
         )  # maxDepth is the difficulty level
+        print(f'Best move is: {move} with score: {score}')
         return move
 
 
