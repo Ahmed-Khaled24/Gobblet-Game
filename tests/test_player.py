@@ -1,6 +1,6 @@
 import pytest
 
-from src.backend.player import *
+from src.backend.Person import *
 
 
 def test_update_pos():

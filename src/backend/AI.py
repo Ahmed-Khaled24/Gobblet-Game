@@ -1,13 +1,14 @@
 import uuid
 
-from src.backend.player import *
+from src.backend.Player import *
 from uuid import uuid1
+
 
 class AI(Player):
     def __init__(self, color: Color, difficulty: int = 2):
         Player.__init__(self, color)
         self.icon = None
-        self.id = "AI: "+uuid.uuid1().__str__()
+        self.id = "AI: " + uuid.uuid1().__str__()
         self.difficulty = difficulty
 
     def __str__(self):
@@ -17,5 +18,5 @@ class AI(Player):
         pass
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass
