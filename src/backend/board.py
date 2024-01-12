@@ -1,4 +1,4 @@
-from src.backend.Player import Player
+from src.backend.player import Player
 from src.utils.invalidMoveException import (
     InvalidMoveException,
     InvalidMovementSamePositionException,

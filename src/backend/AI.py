@@ -1,6 +1,6 @@
 import uuid
 
-from src.backend.Player import *
+from src.backend.player import *
 from uuid import uuid1
 
 

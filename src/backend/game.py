@@ -1,9 +1,9 @@
 from copy import deepcopy
 from enum import Enum
 from typing import Tuple, Optional
-
-from src.backend.Board import Board
+from src.backend.board import Board
 from src.backend.Person import *
+from src.backend.player import Player
 from src.utils.drawException import DrawException
 from src.backend.AI import AI
 from src.utils.invalidMoveException import (

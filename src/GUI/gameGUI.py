@@ -1,10 +1,10 @@
 import pygame
-from src.backend.Game import Game
+from src.backend.game import Game, GameModes
 from human_agent import Human
 
 BOARD_SIZE = 4
 CIRCLE_RADIUS_FACTOR = 8
-COLOURS = {"B": (35, 31, 38), "R": (69, 0, 1), "W": (255, 255, 255)}
+COLOURS = {'B': (35, 31, 38), 'R': (69, 0, 1), 'W': (255, 255, 255)}
 
 
 class GUI:
@@ -17,16 +17,11 @@ class GUI:
         self.Human = Human()
         self.game = None
         self.myfont = pygame.font.SysFont("monospace", 28)
-        self.turns = {
-            "R": (
-                self.myfont.size("Red's turn"),
-                self.myfont.render("Red's turn", True, COLOURS["W"]),
-            ),
-            "B": (
-                self.myfont.size("Black's turn"),
-                self.myfont.render("Black's turn", True, COLOURS["W"]),
-            ),
-        }
+        self.turns = {'R': (self.myfont.size("Red's turn"),
+                            self.myfont.render("Red's turn", True, COLOURS['W'])),
+                      'B': (self.myfont.size("Black's turn"),
+                            self.myfont.render("Black's turn", True, COLOURS['W'])),
+                      }
 
     def on_init(self):
         pygame.init()
@@ -40,7 +35,6 @@ class GUI:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 self._running = False
-        self.selected = self.Human.on_event(event, self.game)
 
     def on_loop(self):
         self.Human.on_loop(self.game)
@@ -49,37 +43,22 @@ class GUI:
         self.win.fill((0, 0, 0))
         for i in range(4):
             for j in range(4):
-                pygame.draw.rect(
-                    self.win,
-                    (255, 255, 255),
-                    (self.left + 80 * i, self.top + 80 * j, 80, 80),
-                    2,
-                    0,
-                )
+                pygame.draw.rect(self.win, (255, 255, 255),
+                                 (self.left + 80 * i, self.top + 80 * j, 80, 80), 2, 0)
                 if self.game.board.grid[i][j][-1] is not None:
-                    pygame.draw.circle(
-                        self.win,
-                        COLOURS[self.game.board.grid[i][j][-1].color.value],
-                        (self.left + 80 * i + 40, self.top + 80 * j + 40),
-                        9 * self.game.board.grid[i][j][-1].size.value,
-                    )
+                    pygame.draw.circle(self.win, COLOURS[self.game.board.grid[i][j][-1].color.value],
+                                       (self.left + 80 * i + 40, self.top + 80 * j + 40),
+                                       9 * self.game.board.grid[i][j][-1].size.value)
+
         for i in range(3):
             if len(self.game.player2.pieces[i]) > 0:
-                pygame.draw.circle(
-                    self.win,
-                    COLOURS["B"],
-                    (100, (280 + (80 * i))),
-                    9 * self.game.player2.pieces[i][-1].size.value,
-                )
+                pygame.draw.circle(self.win, COLOURS['B'], (100, (280 + (80 * i))),
+                                   9 * self.game.player2.pieces[i][-1].size.value)
 
         for i in range(3):
             if len(self.game.player1.pieces[i]) > 0:
-                pygame.draw.circle(
-                    self.win,
-                    COLOURS["R"],
-                    (540, (40 + 80 * (2 - i))),
-                    9 * self.game.player1.pieces[i][-1].size.value,
-                )
+                pygame.draw.circle(self.win, COLOURS['R'], (540, (40 + 80 * (2 - i))),
+                                   9 * self.game.player1.pieces[i][-1].size.value)
 
         if self.selected:
             pc, pr = pygame.mouse.get_pos()
@@ -87,15 +66,10 @@ class GUI:
             ph = pw
             pr -= ph // 2
             pc -= pw // 2
-            pygame.draw.circle(
-                self.win,
-                COLOURS[self.game.turn.value],
-                (pc + pw // 2, pr + ph // 2),
-                min(ph, pw) // 2,
-            )
+            pygame.draw.circle(self.win, COLOURS[self.game.turn.value], (pc + pw // 2, pr + ph // 2), min(ph, pw) // 2)
         size, text = self.turns[self.game.turn.value]
         tw, th = size
-        offset = 50 - th
+        offset = (50 - th)
         self.win.blit(text, (offset + 10, offset))
 
         pygame.display.flip()
@@ -103,7 +77,8 @@ class GUI:
     def cleanup(self):
         pygame.quit()
 
-    def on_execute(self, game: Game):
+    def on_execute(self, game: Game, mode: GameModes):
+        global event
         if self.on_init() == False:
             self._running = False
         self.game = game
@@ -111,4 +86,19 @@ class GUI:
             self.render()
             for event in pygame.event.get():
                 self.on_event(event)
-            self.on_loop()
+            if mode == GameModes.HumanVsHuman:
+                self.selected = self.Human.on_event(event, self.game)
+                self.on_loop()
+            elif mode == GameModes.HumanVsAi:
+                if self.game.turn.value == 'R':
+                    self.selected = self.Human.on_event(event, self.game)
+                    self.on_loop()
+                elif self.game.turn.value == 'B':
+                    self.selected = False
+                    legal_action = self.game.getBestMove(self.game.player2)
+
+                    self.game.addGobblet(legal_action.row, legal_action.column, legal_action.piece,
+                                             legal_action.piece.externalStackIndex)
+
+            elif mode == GameModes.AiVsAi:
+                print('hhhh')

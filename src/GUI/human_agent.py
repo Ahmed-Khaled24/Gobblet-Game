@@ -1,7 +1,7 @@
 import pygame
 from pygame.locals import *
 from src.GUI.status_box import WinnerBox
-from src.backend.Game import Game, GameStatus
+from src.backend.game import Game, GameStatus
 
 CIRCLE_ON_BOARD = USEREVENT + 2
 BLACK_STACKS = USEREVENT + 3
