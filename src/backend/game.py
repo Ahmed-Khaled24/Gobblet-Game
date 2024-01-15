@@ -176,7 +176,7 @@ class Game:
                             moves.append(
                                 Move(MoveType.ADD, largestPiece, row, column, largestPiece.externalStackIndex)
                             )
-                        except Exception as e:
+                        except Exception:
                             pass
                     
         ## Try all of them using movePiece function 
@@ -184,13 +184,22 @@ class Game:
         for row in range(4):
             for column in range(4):
                 current_piece = currentBoard.grid[row][column][-1]
-                if current_piece is None or current_piece.color != currentPlayer.color:
+                print('***************************')
+                print(currentBoard)
+                print(current_piece)
+                print(row, column)
+                print('***************************')
+                if current_piece is None:
+                    continue
+                if current_piece.color != currentPlayer.color:
                     continue
 
                 for row2 in range(4):
                     for column2 in range(4):
+
                         try:
-                            currentBoard.movePiece(row, column, row2, column2, isVirtualMove=True)
+                            boardClone = deepcopy(currentBoard)
+                            boardClone.movePiece(row, column, row2, column2, isVirtualMove=True)
                             moves.append(
                                 Move(
                                     MoveType.MOVE,
@@ -200,8 +209,20 @@ class Game:
                                     None
                                 )
                             )
+                            print('***************************')
+                            print(boardClone)
+                            print(row, column)
+                            print(row2, column2)
+                            print('***************************')
+
                         except Exception:
                             pass 
+        print('***************************')
+        print(moves)
+        print(len(moves))
+
+        print('***************************')
+
         return moves
 
     def __makeMove(self, currentBoard: Board, move: Move) -> Board:

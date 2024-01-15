@@ -199,7 +199,14 @@ class Board:
 
         return linedUpGobbles
 
-    def movePiece(self, oldRow: int, oldColumn: int, newRow: int, newColumn: int, isVirtualMove: bool = False):
+    def movePiece(
+        self,
+        oldRow: int,
+        oldColumn: int,
+        newRow: int,
+        newColumn: int,
+        isVirtualMove: bool = False,
+    ):
         """Move a piece that is already on the board"""
         if (oldRow, oldColumn) == (newRow, newColumn):
             raise InvalidMovementSamePositionException(
