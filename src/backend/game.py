@@ -146,9 +146,7 @@ class Game:
     def __getAvailableMoves(self, currentBoard: Board, currentPlayer: AI) -> list[Move]:
         """
         Returns a list of all possible moves for the current player.
-        NOTE: This function currently only checks for the empty cells on the board and return moves for adding a piece from the external stack.
-        We need to add the moves for moving a piece on the board. or adding piece from external stack on top of another piece.
-        I believe اننا نمشي نفسنا كده و خلاص
+        The list contains all possible addPiece and movePiece actions.
         """
         moves = []
         piece: Piece = None
@@ -181,11 +179,13 @@ class Game:
                         except Exception as e:
                             pass
                     
-        ## Get all possible moves from inside the board to inside the board
-        ## Try all of them using movePiece function and if it raises an exception then it is not a valid move
+        ## Try all of them using movePiece function 
+        ## and if it raises an exception then it is not a valid move
         for row in range(4):
             for column in range(4):
                 current_piece = currentBoard.grid[row][column][-1]
+                if current_piece is None or current_piece.color != currentPlayer.color:
+                    continue
 
                 for row2 in range(4):
                     for column2 in range(4):
