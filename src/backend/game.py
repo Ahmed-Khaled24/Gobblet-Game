@@ -154,18 +154,32 @@ class Game:
         piece: Piece = None
         
         # get the largest piece in the external stack of the current user 
-        topPieces = [row[0][-1], row[1][-1], row[2][-1]]
+        topPieces = [currentPlayer.pieces[0][-1], currentPlayer.pieces[1][-1], currentPlayer.pieces[2][-1]]
         topPieces = [piece for piece in topPieces if piece is not None]
-        largestPiece = topPieces.sort(key=lambda piece: piece.size.value)[0]
-        
-        # if the largest piece is None then there is no available pieces in the external
-        # stacks add piece actions and we need to check movePiece actions
+        largestPiece: list[Piece] = sorted(topPieces, key=lambda piece: piece.size.value)[0]        
+
+        # if the largest piece is None then there is no available pieces in 
+        # the external stacks - add piece actions - and we need to check movePiece actions
         if largestPiece is not None:
             for row in range(4):
                 for column in range(4):
-                    moves.append(
-                        Move(MoveType.ADD, largestPiece, row, column, piece.externalStackIndex)
-                    )
+                    # if the cell is empty then we can add the largest piece to it
+                    if currentBoard.grid[row][column][-1] is None:
+                        moves.append(
+                            Move(MoveType.ADD, largestPiece, row, column, largestPiece.externalStackIndex)
+                        )
+                    # if the cell is not empty then we need to check if we can add the largest piece on top of it
+                    else:
+                        try:
+                            # try to make the add action on a clone board 
+                            # if it raises an exception then it is not a valid move
+                            boardClone = deepcopy(currentBoard)
+                            boardClone.addPiece(row, column, largestPiece, currentPlayer, largestPiece.externalStackIndex, isVirtualMove=True)
+                            moves.append(
+                                Move(MoveType.ADD, largestPiece, row, column, largestPiece.externalStackIndex)
+                            )
+                        except Exception as e:
+                            pass
                     
         ## Get all possible moves from inside the board to inside the board
         ## Try all of them using movePiece function and if it raises an exception then it is not a valid move
