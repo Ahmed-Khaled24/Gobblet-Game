@@ -39,15 +39,14 @@ class WinnerBox:
         pygame.display.flip()
 
     def _draw_box(self, color, message):
-        box_closed = False
         self.running = True
         while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
-                    box_closed = True
                     from src.GUI.main import show_start_screen
 
+                    pygame.display.set_mode((680, 500))
                     show_start_screen()
 
             self.display_box(color, message)
