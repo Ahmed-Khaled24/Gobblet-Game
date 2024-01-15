@@ -183,7 +183,25 @@ class Game:
                     
         ## Get all possible moves from inside the board to inside the board
         ## Try all of them using movePiece function and if it raises an exception then it is not a valid move
-        
+        for row in range(4):
+            for column in range(4):
+                current_piece = currentBoard.grid[row][column][-1]
+
+                for row2 in range(4):
+                    for column2 in range(4):
+                        try:
+                            currentBoard.movePiece(row, column, row2, column2, isVirtualMove=True)
+                            moves.append(
+                                Move(
+                                    MoveType.MOVE,
+                                    current_piece,
+                                    row2,
+                                    column2,
+                                    None
+                                )
+                            )
+                        except Exception:
+                            pass 
         return moves
 
     def __makeMove(self, currentBoard: Board, move: Move) -> Board:
