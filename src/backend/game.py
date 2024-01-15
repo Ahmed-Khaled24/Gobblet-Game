@@ -1,5 +1,6 @@
 from copy import deepcopy
 from enum import Enum
+import math
 from typing import Tuple, Optional
 from src.backend.board import Board
 from src.backend.Person import *
@@ -151,18 +152,24 @@ class Game:
         """
         moves = []
         piece: Piece = None
-        for row in currentPlayer.pieces:  # Trivial way to get the piece to play
-            if len(row) > 0:
-                piece = row[-1]
-                break
-
-        for row in range(4):
-            for column in range(4):
-                if currentBoard.grid[row][column][-1] is None:
+        
+        # get the largest piece in the external stack of the current user 
+        topPieces = [row[0][-1], row[1][-1], row[2][-1]]
+        topPieces = [piece for piece in topPieces if piece is not None]
+        largestPiece = topPieces.sort(key=lambda piece: piece.size.value)[0]
+        
+        # if the largest piece is None then there is no available pieces in the external
+        # stacks add piece actions and we need to check movePiece actions
+        if largestPiece is not None:
+            for row in range(4):
+                for column in range(4):
                     moves.append(
-                        Move(MoveType.ADD, piece, row, column, piece.externalStackIndex)
+                        Move(MoveType.ADD, largestPiece, row, column, piece.externalStackIndex)
                     )
-
+                    
+        ## Get all possible moves from inside the board to inside the board
+        ## Try all of them using movePiece function and if it raises an exception then it is not a valid move
+        
         return moves
 
     def __makeMove(self, currentBoard: Board, move: Move) -> Board:

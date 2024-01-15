@@ -41,7 +41,7 @@ class Board:
             self.grid[row][column].append(piece)
             if not isVirtualMove:
                 player.remove_from_external_stack(raw_number=external_row)
-            piece.update_pos((row, column))
+                piece.update_pos((row, column))
         else:
             linedUpGobblets = self.getLinedUpGobblets(
                 Color.WHITE if piece.color == Color.BLACK else Color.BLACK
@@ -58,6 +58,7 @@ class Board:
                     self.grid[row][column].append(piece)
                     if not isVirtualMove:
                         player.remove_from_external_stack(raw_number=external_row)
+                        piece.update_pos((row, column))
                 else:
                     raise InvalidMoveException(
                         "Invalid move, you can't add your piece on top of larger piece."
@@ -198,7 +199,7 @@ class Board:
 
         return linedUpGobbles
 
-    def movePiece(self, oldRow: int, oldColumn: int, newRow: int, newColumn: int):
+    def movePiece(self, oldRow: int, oldColumn: int, newRow: int, newColumn: int, isVirtualMove: bool = False):
         """Move a piece that is already on the board"""
         if (oldRow, oldColumn) == (newRow, newColumn):
             raise InvalidMovementSamePositionException(
@@ -212,12 +213,14 @@ class Board:
 
         if self.grid[newRow][newColumn][-1] is None:
             self.grid[newRow][newColumn].append(piece)
-            piece.update_pos((newRow, newColumn))
+            if not isVirtualMove:
+                piece.update_pos((newRow, newColumn))
         else:
             existingPiece = self.grid[newRow][newColumn][-1]
             if piece.size > existingPiece.size:
                 self.grid[newRow][newColumn].append(piece)
-                piece.update_pos((newRow, newColumn))
+                if not isVirtualMove:
+                    piece.update_pos((newRow, newColumn))
             else:
                 raise InvalidMoveException(
                     "Invalid move, you can't add your piece on top of larger piece."
