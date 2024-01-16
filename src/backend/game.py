@@ -38,13 +38,16 @@ class GameModes(Enum):
 
 
 class Game:
+    MIN = 0
+    MAX = 1
+
     def __init__(
-        self,
-        mode: GameModes,
-        player1Name: str,
-        player2Name: str,
-        player1Color: Color,
-        player2Color: Color,
+            self,
+            mode: GameModes,
+            player1Name: str,
+            player2Name: str,
+            player1Color: Color,
+            player2Color: Color,
     ):
         self.board = Board()
         self.turn = Color.WHITE
@@ -72,12 +75,12 @@ class Game:
     # 0 <= Col <4
     # 0 <= external_row < 3
     def addGobblet(
-        self,
-        row: int,
-        column: int,
-        piece: Piece,
-        external_row: int,
-        isVirtualMove: bool = False,
+            self,
+            row: int,
+            column: int,
+            piece: Piece,
+            external_row: int,
+            isVirtualMove: bool = False,
     ):
         "Add gobblet from the external stack"
         try:
@@ -143,6 +146,14 @@ class Game:
             )
             self.game_status = GameStatus.Win
 
+    def get_top_pieces(self, player: AI) -> list[Piece]:
+        """ Returns the pieces on the top of each stack """
+        possible_outsides = []
+        for stack in player.pieces:
+            if stack and len(stack) > 0:
+                possible_outsides.append(stack[-1])  # The last piece in the list is on the top of the stack
+        return possible_outsides
+
     def __getAvailableMoves(self, currentBoard: Board, currentPlayer: AI) -> list[Move]:
         """
         Returns a list of all possible moves for the current player.
@@ -150,12 +161,15 @@ class Game:
         """
         moves = []
         piece: Piece = None
-        
-        # get the largest piece in the external stack of the current user 
-        topPieces = [currentPlayer.pieces[0][-1], currentPlayer.pieces[1][-1], currentPlayer.pieces[2][-1]]
-        topPieces = [piece for piece in topPieces if piece is not None]
-        largestPiece: list[Piece] = sorted(topPieces, key=lambda piece: piece.size.value)[0]        
 
+        # get the largest piece in the external stack of the current user 
+        largestPiece = None
+        topPieces = self.get_top_pieces(currentPlayer)
+        size = -1
+        for piece in topPieces:
+            if piece.size.value > size:
+                size = piece.size.value
+                largestPiece = piece
         # if the largest piece is None then there is no available pieces in 
         # the external stacks - add piece actions - and we need to check movePiece actions
         if largestPiece is not None:
@@ -172,23 +186,20 @@ class Game:
                             # try to make the add action on a clone board 
                             # if it raises an exception then it is not a valid move
                             boardClone = deepcopy(currentBoard)
-                            boardClone.addPiece(row, column, largestPiece, currentPlayer, largestPiece.externalStackIndex, isVirtualMove=True)
+                            boardClone.addPiece(row, column, largestPiece, currentPlayer,
+                                                largestPiece.externalStackIndex, isVirtualMove=True)
                             moves.append(
                                 Move(MoveType.ADD, largestPiece, row, column, largestPiece.externalStackIndex)
                             )
                         except Exception:
                             pass
-                    
+
         ## Try all of them using movePiece function 
         ## and if it raises an exception then it is not a valid move
         for row in range(4):
             for column in range(4):
                 current_piece = currentBoard.grid[row][column][-1]
-                print('***************************')
-                print(currentBoard)
-                print(current_piece)
-                print(row, column)
-                print('***************************')
+
                 if current_piece is None:
                     continue
                 if current_piece.color != currentPlayer.color:
@@ -209,19 +220,10 @@ class Game:
                                     None
                                 )
                             )
-                            print('***************************')
-                            print(boardClone)
-                            print(row, column)
-                            print(row2, column2)
-                            print('***************************')
+
 
                         except Exception:
-                            pass 
-        print('***************************')
-        print(moves)
-        print(len(moves))
-
-        print('***************************')
+                            pass
 
         return moves
 
@@ -230,7 +232,7 @@ class Game:
         then return the new board to perform the minimax algorithm on it."""
         assert move is not None
         assert currentBoard is not None
-        
+
         newBoard = deepcopy(currentBoard)
         if move.type == MoveType.ADD:
             currentPlayer = (
@@ -272,13 +274,67 @@ class Game:
 
         return score
 
+    def alpha_beta_recursion(self, curr_depth, agent_turn, currentPlayer, currentBoard, alpha, beta):
+        if curr_depth == 0:  # reached a leaf  or  finished game
+            return self.__evaluate(currentBoard, currentPlayer)
+        possibleMoves = self.__getAvailableMoves(currentBoard, currentPlayer)
+
+        if agent_turn == self.MAX:
+            for legal_action in possibleMoves:
+                newBoard = self.__makeMove(currentBoard, legal_action)
+                nextPlayer = (
+                    self.player1
+                    if currentPlayer.color == self.player2.color
+                    else self.player2
+                )
+                curr_score = self.alpha_beta_recursion(curr_depth - 1, self.MIN, nextPlayer, newBoard, alpha, beta)
+                if beta <= alpha:
+                    break
+                alpha = max(alpha, curr_score)
+            return alpha
+
+        else:  # MIN
+            for legal_action in possibleMoves:
+                newBoard = self.__makeMove(currentBoard, legal_action)
+                nextPlayer = (
+                    self.player1
+                    if currentPlayer.color == self.player2.color
+                    else self.player2
+                )
+                curr_score = self.alpha_beta_recursion(curr_depth - 1, self.MAX, nextPlayer, newBoard, alpha, beta)
+                if beta <= alpha:
+                    break
+                beta = min(beta, curr_score)
+            return beta
+
+    def get_action(
+            self, currentBoard: Board, currentPlayer: AI, maxDepth: int) -> Tuple[int, Move]:
+
+        actions_scores = []
+        possibleMoves = self.__getAvailableMoves(currentBoard, currentPlayer)
+        for legal_action in possibleMoves:
+            newBoard = self.__makeMove(currentBoard, legal_action)
+            nextPlayer = (
+                self.player1
+                if currentPlayer.color == self.player2.color
+                else self.player2
+            )
+            score = self.alpha_beta_recursion(maxDepth - 1, self.MIN, nextPlayer, newBoard, alpha=-10e12,
+                                              beta=10e12)
+            actions_scores.append((legal_action, score))
+        just_scores = [score for _, score in actions_scores]
+        best_score = max(just_scores)
+        best_actions = [action for action, score in actions_scores if score == best_score]
+        return best_score, best_actions[0]
+
     def __minimax(
-        self, currentBoard: Board, currentPlayer: AI, maxDepth: int, currentDepth: int
+            self, currentBoard: Board, currentPlayer: AI, maxDepth: int, currentDepth: int
     ) -> Tuple[int, Move]:
         """This function is the minimax algorithm. It returns the best move for the given player."""
 
         ## Base case
-        possibleMoves = self.__getAvailableMoves(currentBoard, currentPlayer) ## If this returns empty list then this is a terminal state.
+        possibleMoves = self.__getAvailableMoves(currentBoard,
+                                                 currentPlayer)  ## If this returns empty list then this is a terminal state.
         if currentDepth == maxDepth or len(possibleMoves) == 0:
             return self.__evaluate(currentBoard, currentPlayer), None
 
@@ -306,13 +362,18 @@ class Game:
 
         return bestScore, bestMove
 
-    def getBestMove(self, player: AI) -> Move:
+    def getBestMove(self, player: AI, TYPE) -> Move:
         """This function is the interface for the minimax algorithm."""
-        score, move = self.__minimax(
-            self.board, player, player.difficulty, 0
-        )  # maxDepth is the difficulty level
-        print(f'Best move is: {move} with score: {score}')
-        return move
+        if TYPE == 1:
+            score, move = self.__minimax(
+                self.board, player, player.difficulty, 0)  # maxDepth is the difficulty level
+            print(f'Best move is: {move} with score: {score}')
+            return move
+        if TYPE == 2:
+            score, move = self.get_action(
+                self.board, player, player.difficulty)  # maxDepth is the difficulty level
+            print(f'Best move is: {move} with score: {score}')
+            return move
 
 
 if __name__ == "__main__":

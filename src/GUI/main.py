@@ -57,19 +57,21 @@ def show_start_screen():
     start_menu.add.button("Quit", pygame_menu.events.EXIT)
     aivai = pygame_menu.Menu(width=display_width, height=display_height, title='AI vs AI',
                              theme=pygame_menu.themes.THEME_DARK)
-    aivai.add.selector('Difficulty AI 1:', [('Hard', 1), ('Easy', 2)], onchange=set_game_difficulty)
-    aivai.add.selector('Difficulty AI 2:', [('Hard', 1), ('Easy', 2)], onchange=set_game_difficulty)
+    aivai.add.selector('Difficulty AI 1: ', [('Hard', 1), ('Easy', 2)], onchange=set_game_difficulty)
+    aivai.add.selector('Difficulty AI 2: ', [('Hard', 1), ('Easy', 2)], onchange=set_game_difficulty)
+    aivai.add.selector('Algorithm: ', [('MiniMax', 1), ('AlphaBeta', 2)], onchange=set_game_algorithm)
     aivai.add.button('Play', lambda: game_loop(GameModes.AiVsAi))
 
     aivh = pygame_menu.Menu(width=display_width, height=display_height, title='AI vs Human',
                             theme=pygame_menu.themes.THEME_DARK)
-    aivh.add.selector('Difficulty:', [('Hard', 1), ('Easy', 2)], onchange=set_game_difficulty)
+    aivh.add.selector('Difficulty AI: ', [('Hard', 1), ('Easy', 2)], onchange=set_game_difficulty)
+    aivh.add.selector('Algorithm: ', [('MiniMax', 1), ('AlphaBeta', 2)], onchange=set_game_algorithm)
     aivh.add.button('Play', lambda: game_loop(GameModes.HumanVsAi))
     start_menu.mainloop(win)
 
 
 def set_game_difficulty(selected: Tuple, value: Any):
-    if (value == 1):
+    if value == 1:
         difficulty = 25
     elif (value == 2):
         difficulty = 50
@@ -79,10 +81,21 @@ def set_game_difficulty(selected: Tuple, value: Any):
         difficulty = 25
 
 
+TYPE = 1
+
+
+def set_game_algorithm(selected: Tuple, value: Any):
+    global TYPE
+    if value == 1:
+        TYPE = 1
+    elif value == 2:
+        TYPE = 2
+
+
 def game_loop(mode: GameModes):
     game = Game(mode, "Player1", "Player2", Color.WHITE, Color.BLACK)
     gui = GUI()
-    gui.on_execute(game, mode)
+    gui.on_execute(game, mode, TYPE)
 
 
 show_start_screen()
