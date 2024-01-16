@@ -1,8 +1,8 @@
-from AI import AI
-from player import Player, Piece
-from board import Board
+from src.backend.AI import AI
+from src.backend.player import Player, Piece
+from src.backend.board import Board
+from src.backend.Person import Person
 from typing import Optional, Tuple
-from Person import Person
 from src.utils.piece import Color
 
 
@@ -50,7 +50,7 @@ class Evaluation:
         pass
 
     def get_pieces_score(self, pieces: list[Piece]):
-        unique = self.check_uniqueness()
+        unique = Evaluation.check_uniqueness(pieces)
         if not unique:
             pass
         else:
@@ -62,9 +62,19 @@ class Evaluation:
             num_min += len(self.min.pieces[i]) if self.min.pieces[i] else 0
             num_max += len(self.max.pieces[i]) if self.max.pieces[i] else 0
         return num_min, num_max
+    @classmethod
+    def check_uniqueness(cls, pieces: list[Piece]) -> bool:
+        color = None
+        for piece in pieces:
+            if piece is None:
+                continue
+            else:
+                if color is None:
+                    color = piece.color
+                elif color != piece.color:
+                    return False
+        return True
 
-    def check_uniqueness(self, pieces: list[Piece]) -> bool:
-        pass
 
 if __name__ == '__main__':
     eval = Evaluation()
