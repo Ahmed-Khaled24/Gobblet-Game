@@ -11,8 +11,6 @@ class Evaluation:
         self.board: Optional[Board] = None
         self.min: Optional[Player] = None
         self.max: Optional[Player] = None
-        self.num_max_external = 0
-        self.num_min_eternal = 0
 
     def heuristic_v2(self, board: Board, minimizer: Player, maximizer: Player):
         """
@@ -21,12 +19,11 @@ class Evaluation:
                         - For each piece multiple with 10 or any number
 
                     if there exists MIXED COLORS in the direction:
-                     - #Pieces of MIN player < #Pieces of MAX outside the board
+                     - size of Pieces of MIN player < #Pieces of MAX outside the board
                         do the same as above
                      - otherwise 0 rate
         """
         self.min, self.max = minimizer, maximizer
-        self.num_max_external, self.num_min_eternal = self.num_external_pieces()
         self.board = board
 
         score = 0
@@ -53,16 +50,37 @@ class Evaluation:
         unique = Evaluation.check_uniqueness(pieces)
         score = 1
         color = None
-        if not unique and self.num_max_external < self.num_min_eternal:
-            return 0
+        if not unique:
+            # case: number of whites equal number of blacks
+            # state will be equal to zero
+
+            num_white, num_black = Evaluation.count_pieces_in_direction(pieces)
+            color_dominate = Color.BLACK if num_white < num_black else Color.WHITE
+            if num_black == num_white:
+                return 0
+
+            pieces_for_another_color = [piece for piece in pieces if piece and piece.color != color_dominate]
+            player_dominate = self.max if self.max.color == color_dominate else self.min
+            has_large_piece = False
+            piece_to_compare = pieces_for_another_color[0]
+            for st in player_dominate.pieces:
+                if st[-1].size > piece_to_compare.size:
+                    has_large_piece = True
+                    break
+            if not has_large_piece:
+                return 0
+
+            for piece in pieces:
+                if piece and piece.color == color_dominate:
+                    score *= piece.size.value * 10
+            return score if color_dominate == self.max.color else score * -1
         else:
             for piece in pieces:
                 if piece:
                     if color is None:
                         color = piece.color
-                    score *= piece.size.value() * 10
-        return score if color == self.max.color else score * -1
-
+                    score *= piece.size.value * 10
+            return score if color == self.max.color else score * -1
 
     def num_external_pieces(self) -> Tuple[int, int]:
         num_min, num_max = 0, 0
@@ -83,6 +101,18 @@ class Evaluation:
                 elif color != piece.color:
                     return False
         return True
+
+    @classmethod
+    def count_pieces_in_direction(cls, pieces: list[Piece]) -> Tuple[int, int]:
+        count_w, count_b = 0, 0
+        for piece in pieces:
+            if not piece:
+                continue
+            if piece.color == Color.WHITE:
+                count_w += 1
+            elif piece.color == Color.BLACK:
+                count_b += 1
+        return count_w, count_b
 
 
 if __name__ == '__main__':
