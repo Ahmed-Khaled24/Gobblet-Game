@@ -1,6 +1,6 @@
 import pygame
 from pygame.locals import *
-from src.GUI.status_box import WinnerBox
+from src.GUI.status_box import GameStatusBox
 from src.backend.game import Game, GameStatus
 
 CIRCLE_ON_BOARD = USEREVENT + 2
@@ -87,11 +87,11 @@ class Human:
                                 print(game.winner.color.value)
                                 try:
                                     screen = pygame.display.get_surface()
-                                    WinnerBox(screen).draw_winner_box(
+                                    GameStatusBox(screen).draw_winner_box(
                                         game.winner.color.value, game.winner.name
                                     )
                                 except Exception as e:
-                                    print("Error in WinnerBox")
+                                    print("Error in GameStatusBox")
                                     print(e)
                             elif game.game_status == GameStatus.Draw:
                                 pass
