@@ -79,7 +79,7 @@ class GUI:
     def cleanup(self):
         pygame.quit()
 
-    def on_execute(self, game: Game, mode: GameModes):
+    def on_execute(self, game: Game, mode: GameModes, TYPE):
         global event
         if self.on_init() == False:
             self._running = False
@@ -97,20 +97,20 @@ class GUI:
                     self.on_loop()
                 elif self.game.turn.value == 'B':
                     self.selected = False
-                    legal_action = self.game.getBestMove(self.game.player2)
+                    legal_action = self.game.getBestMove(self.game.player2,TYPE)
 
                     self.game.addGobblet(legal_action.row, legal_action.column, legal_action.piece,
                                          legal_action.piece.externalStackIndex)
 
             elif mode == GameModes.AiVsAi:
                 if self.game.turn.value == 'R':
-                    legal_action = self.game.getBestMove(self.game.player1)
+                    legal_action = self.game.getBestMove(self.game.player1,TYPE)
                     self.game.addGobblet(legal_action.row, legal_action.column, legal_action.piece,
                                          legal_action.piece.externalStackIndex)
 
                 elif self.game.turn.value == 'B':
                     pygame.time.delay(1000)
-                    legal_action = self.game.getBestMove(self.game.player2)
+                    legal_action = self.game.getBestMove(self.game.player2,TYPE)
                     self.game.addGobblet(legal_action.row, legal_action.column, legal_action.piece,
                                          legal_action.piece.externalStackIndex)
                 self.game.statusCheck()

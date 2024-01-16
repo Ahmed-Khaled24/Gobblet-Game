@@ -307,9 +307,8 @@ class Game:
                 beta = min(beta, curr_score)
             return beta
 
-    def __minimax(
+    def get_action(
             self, currentBoard: Board, currentPlayer: AI, maxDepth: int) -> Tuple[int, Move]:
-        """This function is the minimax algorithm. It returns the best move for the given player."""
 
         actions_scores = []
         possibleMoves = self.__getAvailableMoves(currentBoard, currentPlayer)
@@ -328,12 +327,53 @@ class Game:
         best_actions = [action for action, score in actions_scores if score == best_score]
         return best_score, best_actions[0]
 
-    def getBestMove(self, player: AI) -> Move:
+    def __minimax(
+            self, currentBoard: Board, currentPlayer: AI, maxDepth: int, currentDepth: int
+    ) -> Tuple[int, Move]:
+        """This function is the minimax algorithm. It returns the best move for the given player."""
+
+        ## Base case
+        possibleMoves = self.__getAvailableMoves(currentBoard,
+                                                 currentPlayer)  ## If this returns empty list then this is a terminal state.
+        if currentDepth == maxDepth or len(possibleMoves) == 0:
+            return self.__evaluate(currentBoard, currentPlayer), None
+
+        ## Bubble up the best move
+        bestMove = None
+        bestScore = -10e12 if currentPlayer.color == self.turn else 10e12
+        for move in possibleMoves:
+            newBoard = self.__makeMove(currentBoard, move)
+            nextPlayer = (
+                self.player1
+                if currentPlayer.color == self.player2.color
+                else self.player2
+            )
+            currentScore, currentMove = self.__minimax(
+                newBoard, nextPlayer, maxDepth, currentDepth + 1
+            )
+            if currentPlayer.color == self.turn:  # Maximizing player
+                if currentScore > bestScore:
+                    bestScore = currentScore
+                    bestMove = move
+            else:  # Minimizing player
+                if currentScore < bestScore:
+                    bestScore = currentScore
+                    bestMove = move
+
+        return bestScore, bestMove
+
+    def getBestMove(self, player: AI, TYPE) -> Move:
         """This function is the interface for the minimax algorithm."""
-        score, move = self.__minimax(
-            self.board, player, player.difficulty)  # maxDepth is the difficulty level
-        print(f'Best move is: {move} with score: {score}')
-        return move
+        if TYPE == 1:
+            score, move = self.__minimax(
+                self.board, player, player.difficulty,0)  # maxDepth is the difficulty level
+            print(f'Best move is: {move} with score: {score}')
+            return move
+        if TYPE == 2:
+            score, move = self.get_action(
+                self.board, player, player.difficulty)  # maxDepth is the difficulty level
+            print(f'Best move is: {move} with score: {score}')
+            return move
 
 
 if __name__ == "__main__":
