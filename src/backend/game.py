@@ -38,6 +38,9 @@ class GameModes(Enum):
 
 
 class Game:
+    MIN = 0
+    MAX = 1
+
     def __init__(
             self,
             mode: GameModes,
@@ -271,46 +274,64 @@ class Game:
 
         return score
 
+    def alpha_beta_recursion(self, curr_depth, agent_turn, currentPlayer, currentBoard, alpha, beta):
+        if curr_depth == 0:  # reached a leaf  or  finished game
+            return self.__evaluate(currentBoard, currentPlayer)
+        possibleMoves = self.__getAvailableMoves(currentBoard, currentPlayer)
+
+        if agent_turn == self.MAX:
+            for legal_action in possibleMoves:
+                newBoard = self.__makeMove(currentBoard, legal_action)
+                nextPlayer = (
+                    self.player1
+                    if currentPlayer.color == self.player2.color
+                    else self.player2
+                )
+                curr_score = self.alpha_beta_recursion(curr_depth - 1, self.MIN, nextPlayer, newBoard, alpha, beta)
+                if beta <= alpha:
+                    break
+                alpha = max(alpha, curr_score)
+            return alpha
+
+        else:  # MIN
+            for legal_action in possibleMoves:
+                newBoard = self.__makeMove(currentBoard, legal_action)
+                nextPlayer = (
+                    self.player1
+                    if currentPlayer.color == self.player2.color
+                    else self.player2
+                )
+                curr_score = self.alpha_beta_recursion(curr_depth - 1, self.MAX, nextPlayer, newBoard, alpha, beta)
+                if beta <= alpha:
+                    break
+                beta = min(beta, curr_score)
+            return beta
+
     def __minimax(
-            self, currentBoard: Board, currentPlayer: AI, maxDepth: int, currentDepth: int
-    ) -> Tuple[int, Move]:
+            self, currentBoard: Board, currentPlayer: AI, maxDepth: int) -> Tuple[int, Move]:
         """This function is the minimax algorithm. It returns the best move for the given player."""
 
-        ## Base case
-        possibleMoves = self.__getAvailableMoves(currentBoard,
-                                                 currentPlayer)  ## If this returns empty list then this is a terminal state.
-        if currentDepth == maxDepth or len(possibleMoves) == 0:
-            return self.__evaluate(currentBoard, currentPlayer), None
-
-        ## Bubble up the best move
-        bestMove = None
-        bestScore = -10e12 if currentPlayer.color == self.turn else 10e12
-        for move in possibleMoves:
-            newBoard = self.__makeMove(currentBoard, move)
+        actions_scores = []
+        possibleMoves = self.__getAvailableMoves(currentBoard, currentPlayer)
+        for legal_action in possibleMoves:
+            newBoard = self.__makeMove(currentBoard, legal_action)
             nextPlayer = (
                 self.player1
                 if currentPlayer.color == self.player2.color
                 else self.player2
             )
-            currentScore, currentMove = self.__minimax(
-                newBoard, nextPlayer, maxDepth, currentDepth + 1
-            )
-            if currentPlayer.color == self.turn:  # Maximizing player
-                if currentScore > bestScore:
-                    bestScore = currentScore
-                    bestMove = move
-            else:  # Minimizing player
-                if currentScore < bestScore:
-                    bestScore = currentScore
-                    bestMove = move
-
-        return bestScore, bestMove
+            score = self.alpha_beta_recursion(maxDepth - 1, self.MIN, nextPlayer, newBoard, alpha=-10e12,
+                                              beta=10e12)
+            actions_scores.append((legal_action, score))
+        just_scores = [score for _, score in actions_scores]
+        best_score = max(just_scores)
+        best_actions = [action for action, score in actions_scores if score == best_score]
+        return best_score, best_actions[0]
 
     def getBestMove(self, player: AI) -> Move:
         """This function is the interface for the minimax algorithm."""
         score, move = self.__minimax(
-            self.board, player, player.difficulty, 0
-        )  # maxDepth is the difficulty level
+            self.board, player, player.difficulty)  # maxDepth is the difficulty level
         print(f'Best move is: {move} with score: {score}')
         return move
 
