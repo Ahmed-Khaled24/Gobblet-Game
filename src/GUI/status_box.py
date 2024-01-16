@@ -68,9 +68,8 @@ class GameStatusBox:
                 if event.type == pygame.QUIT or event.type == pygame.KEYDOWN:
                     pygame.quit()
 
-                ## Here i check for every mouse click 
+                ## Here i check for every mouse click
                 elif event.type == pygame.MOUSEBUTTONUP:
-
                     # if the mouse click is on the close button of the box then i fire the close event
 
                     # TODO: adjust button rect from modal to screen coordinates dynamically

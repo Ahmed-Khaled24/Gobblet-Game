@@ -29,7 +29,9 @@ class Color(Enum):
 
     def __str__(self):
         return self.value
-
+    
+    def __hash__(self) -> int:
+        return hash(self.value)
     def __eq__(self, other):
         if isinstance(other, Color):
             return self.value == other.value

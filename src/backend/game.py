@@ -1,6 +1,8 @@
 from copy import deepcopy
+import datetime
 from enum import Enum
 import math
+from time import sleep, time
 from typing import Tuple, Optional
 from src.backend.board import Board
 from src.backend.Person import *
@@ -49,6 +51,7 @@ class Game:
             player1Color: Color,
             player2Color: Color,
     ):
+        self.memoization_table = {}
         self.board = Board()
         self.turn = Color.WHITE
         assert player1Color != player2Color
@@ -273,11 +276,32 @@ class Game:
                     score -= 1
 
         return score
+    
 
-    def alpha_beta_recursion(self, curr_depth, agent_turn, currentPlayer, currentBoard, alpha, beta):
+    def __order_moves(self, possible_moves, currentBoard, currentPlayer):
+        # Order moves based on your existing evaluation function.
+        return sorted(possible_moves, key=lambda move: self.__evaluate(currentBoard, currentPlayer), reverse=True)
+
+
+
+    def alpha_beta_recursion(self, curr_depth, agent_turn, currentPlayer, currentBoard, alpha, beta, get_time_diff, max_time):
+        print('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&')
+        print(f'Current depth is: {curr_depth}')
+        print(f'Current player is: {currentPlayer}')
+        print(f'Current Time is {get_time_diff()}')
+        print('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&')
+
         if curr_depth == 0:  # reached a leaf  or  finished game
             return self.__evaluate(currentBoard, currentPlayer)
         possibleMoves = self.__getAvailableMoves(currentBoard, currentPlayer)
+
+        memo_key = (hash(currentBoard))
+
+
+        # Check if the result is already memoized
+        if memo_key in self.memoization_table:
+            return self.memoization_table[memo_key]
+        
 
         if agent_turn == self.MAX:
             for legal_action in possibleMoves:
@@ -287,11 +311,13 @@ class Game:
                     if currentPlayer.color == self.player2.color
                     else self.player2
                 )
-                curr_score = self.alpha_beta_recursion(curr_depth - 1, self.MIN, nextPlayer, newBoard, alpha, beta)
+                curr_score = self.alpha_beta_recursion(curr_depth - 1, self.MIN, nextPlayer, newBoard, alpha, beta, get_time_diff, max_time)
                 if beta <= alpha:
                     break
                 alpha = max(alpha, curr_score)
-            return alpha
+                if get_time_diff() > max_time:
+                    break
+            result = alpha
 
         else:  # MIN
             for legal_action in possibleMoves:
@@ -301,31 +327,71 @@ class Game:
                     if currentPlayer.color == self.player2.color
                     else self.player2
                 )
-                curr_score = self.alpha_beta_recursion(curr_depth - 1, self.MAX, nextPlayer, newBoard, alpha, beta)
+                curr_score = self.alpha_beta_recursion(curr_depth - 1, self.MAX, nextPlayer, newBoard, alpha, beta, get_time_diff, max_time)
                 if beta <= alpha:
                     break
                 beta = min(beta, curr_score)
-            return beta
+                if get_time_diff() > max_time:
+                    break
+            result = beta
 
-    def get_action(
-            self, currentBoard: Board, currentPlayer: AI, maxDepth: int) -> Tuple[int, Move]:
+        # Memoize the result
+        self.memoization_table[memo_key] = result
+        return result
 
-        actions_scores = []
-        possibleMoves = self.__getAvailableMoves(currentBoard, currentPlayer)
-        for legal_action in possibleMoves:
-            newBoard = self.__makeMove(currentBoard, legal_action)
-            nextPlayer = (
-                self.player1
-                if currentPlayer.color == self.player2.color
-                else self.player2
-            )
-            score = self.alpha_beta_recursion(maxDepth - 1, self.MIN, nextPlayer, newBoard, alpha=-10e12,
-                                              beta=10e12)
-            actions_scores.append((legal_action, score))
-        just_scores = [score for _, score in actions_scores]
-        best_score = max(just_scores)
-        best_actions = [action for action, score in actions_scores if score == best_score]
-        return best_score, best_actions[0]
+   
+    
+    def __gen_time_diff(self):
+        start_time = time()
+        def inner():
+            end_time = time()
+            diff = end_time - start_time
+            return diff
+        return inner
+
+    def get_action(self, currentBoard: Board, currentPlayer: AI, maxDepth: int, maxTime: float) -> Tuple[int, Move]:
+        best_score = float('-inf')
+        best_move = None
+        get_time_diff = self.__gen_time_diff()
+
+        for depth in range(1, maxDepth + 1):
+            actions_scores = []
+            possible_moves = self.__getAvailableMoves(currentBoard, currentPlayer)
+            # ordered_moves = self.order_moves(possible_moves, currentBoard, currentPlayer)
+
+            for legal_action in possible_moves:
+                newBoard = self.__makeMove(currentBoard, legal_action)
+                nextPlayer = (
+                    self.player1
+                    if currentPlayer.color == self.player2.color
+                    else self.player2
+                )
+                score = self.alpha_beta_recursion(depth - 1, self.MIN, nextPlayer, newBoard, alpha=float('-inf'), beta=float('inf'),
+                                                   get_time_diff=get_time_diff, max_time=maxTime)
+                actions_scores.append((legal_action, score))
+
+                # Check if time limit exceeded
+                if get_time_diff() > maxTime:
+                    print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+                    print(f'Current MAX depth is: {depth}')
+                    print(f'memoization table is {len(self.memoization_table)}')
+                    print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+                    break
+
+            just_scores = [score for _, score in actions_scores]
+            current_best_score = max(just_scores)
+
+            if current_best_score > best_score:
+                best_score = current_best_score
+                best_move = [action for action, score in actions_scores if score == current_best_score][0]
+
+            # Check if time limit exceeded
+            if get_time_diff() > maxTime:
+                break
+        
+        print(f'Best score is: {best_score}')
+
+        return best_score, best_move
 
     def __minimax(
             self, currentBoard: Board, currentPlayer: AI, maxDepth: int, currentDepth: int
@@ -370,11 +436,10 @@ class Game:
             print(f'Best move is: {move} with score: {score}')
             return move
         if TYPE == 2:
+            # TODO: fix this to be addded dynamically from init here
             score, move = self.get_action(
-                self.board, player, player.difficulty)  # maxDepth is the difficulty level
+                self.board, player, 10, 4)  # maxDepth is the difficulty level
             print(f'Best move is: {move} with score: {score}')
             return move
 
 
-if __name__ == "__main__":
-    pass
