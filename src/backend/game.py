@@ -55,10 +55,10 @@ class Game:
             self.player2 = Person(player2Color, player2Name)
         elif mode == GameModes.HumanVsAi:
             self.player1 = Person(player1Color, player1Name)
-            self.player2 = AI(player2Color)
+            self.player2 = AI(player2Color, player2Name)
         elif mode == GameModes.AiVsAi:
-            self.player1 = AI(player1Color)
-            self.player2 = AI(player2Color)
+            self.player1 = AI(player1Color, player1Name)
+            self.player2 = AI(player2Color, player2Name)
         self.game_status: GameStatus = GameStatus.OnGame
         self.winner = None
 
