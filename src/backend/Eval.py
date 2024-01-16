@@ -49,12 +49,20 @@ class Evaluation:
     def evaluate_diagonals(self) -> int:
         pass
 
-    def get_pieces_score(self, pieces: list[Piece]):
+    def get_pieces_score(self, pieces: list[Piece]) -> int:
         unique = Evaluation.check_uniqueness(pieces)
-        if not unique:
-            pass
+        score = 1
+        color = None
+        if not unique and self.num_max_external < self.num_min_eternal:
+            return 0
         else:
-            pass
+            for piece in pieces:
+                if piece:
+                    if color is None:
+                        color = piece.color
+                    score *= piece.size.value() * 10
+        return score if color == self.max.color else score * -1
+
 
     def num_external_pieces(self) -> Tuple[int, int]:
         num_min, num_max = 0, 0
@@ -62,6 +70,7 @@ class Evaluation:
             num_min += len(self.min.pieces[i]) if self.min.pieces[i] else 0
             num_max += len(self.max.pieces[i]) if self.max.pieces[i] else 0
         return num_min, num_max
+
     @classmethod
     def check_uniqueness(cls, pieces: list[Piece]) -> bool:
         color = None
