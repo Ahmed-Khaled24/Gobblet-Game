@@ -37,14 +37,28 @@ class Evaluation:
         assert self.min is not None and self.max is not None
         score = 0
         for row in self.board.grid:
-            score += self.get_pieces_score(row)
+            score += self.get_pieces_score([element[-1] for element in row])
         return score
 
     def evaluate_cols(self) -> int:
-        pass
+        assert self.min is not None and self.max is not None
+        score = 0
+        for i in range(4):
+            score += self.get_pieces_score([row[i][-1] for row in self.board.grid])
+        return score
 
     def evaluate_diagonals(self) -> int:
-        pass
+        main_diagonal = []
+        anti_diagonal = []
+        for i in range(4):
+            for j in range(4):
+                if i == j:
+                    main_diagonal.append(self.board.grid[i][j][-1])
+                if i + j + 1 == 4:
+                    anti_diagonal.append(self.board.grid[i][j][-1])
+        score = self.get_pieces_score(main_diagonal)
+        score += self.get_pieces_score(anti_diagonal)
+        return score
 
     def get_pieces_score(self, pieces: list[Piece]) -> int:
         unique = Evaluation.check_uniqueness(pieces)
@@ -80,6 +94,8 @@ class Evaluation:
                     if color is None:
                         color = piece.color
                     score *= piece.size.value * 10
+            if not color:
+                return 0
             return score if color == self.max.color else score * -1
 
     def num_external_pieces(self) -> Tuple[int, int]:
@@ -116,10 +132,11 @@ class Evaluation:
 
 
 if __name__ == '__main__':
-    eval = Evaluation()
-    board = Board()
-    ai = AI(color=Color.WHITE)
-    person = Person(color=Color.BLACK)
-    eval.heuristic_v2(board=board,
-                      minimizer=ai,
-                      maximizer=person)
+    pass
+    # eval = Evaluation()
+    # board = Board()
+    # ai = AI(color=Color.WHITE)
+    # person = Person(color=Color.BLACK)
+    # print(eval.heuristic_v2(board=board,
+    #                   minimizer=ai,
+    #                   maximizer=person))
