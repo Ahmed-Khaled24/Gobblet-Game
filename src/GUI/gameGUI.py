@@ -97,7 +97,7 @@ class GUI:
                     self.on_loop()
                 elif self.game.turn.value == 'B':
                     self.selected = False
-                    legal_action = self.game.getBestMove(self.game.player2,TYPE)
+                    legal_action = self.game.getBestMove(self.game.player2, TYPE)
 
                     self.game.addGobblet(legal_action.row, legal_action.column, legal_action.piece,
                                          legal_action.piece.externalStackIndex)

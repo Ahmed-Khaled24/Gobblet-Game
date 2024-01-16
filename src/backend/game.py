@@ -366,7 +366,7 @@ class Game:
         """This function is the interface for the minimax algorithm."""
         if TYPE == 1:
             score, move = self.__minimax(
-                self.board, player, player.difficulty,0)  # maxDepth is the difficulty level
+                self.board, player, player.difficulty, 0)  # maxDepth is the difficulty level
             print(f'Best move is: {move} with score: {score}')
             return move
         if TYPE == 2:

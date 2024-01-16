@@ -3,6 +3,7 @@ from pygame.locals import *
 
 PLAY_AGAIN_EVENT = USEREVENT + 1
 
+
 class GameStatusBox:
     ## This class is the box that appears when the game is over and it shows the winner or if it is a draw
     ## It is a modal box that appears on top of the game screen
@@ -51,12 +52,12 @@ class GameStatusBox:
         # Create "Play again" button
         self.button_rect = pygame.Rect(100, 150, 100, 50)
         pygame.draw.rect(modal_surface, button_color, self.button_rect)
-        
+
         # Add text to the button
         button_text = self.font.render("Play again", True, self.WHITE)
         button_text_rect = button_text.get_rect(center=self.button_rect.center)
         modal_surface.blit(button_text, button_text_rect.topleft)
-        
+
         self.screen.blit(modal_surface, (box_x, box_y))
         pygame.display.flip()
 
@@ -66,7 +67,7 @@ class GameStatusBox:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT or event.type == pygame.KEYDOWN:
                     pygame.quit()
-                
+
                 ## Here i check for every mouse click 
                 elif event.type == pygame.MOUSEBUTTONUP:
 
@@ -75,10 +76,10 @@ class GameStatusBox:
                     # TODO: adjust button rect from modal to screen coordinates dynamically
                     # adjust button rect from modal to screen coordinates
                     adjusted_rect = pygame.Rect(280, 300, 100, 50)
-  
+
                     if adjusted_rect.collidepoint(event.pos):
                         pygame.event.post(pygame.event.Event(PLAY_AGAIN_EVENT))
-                
+
                 if event.type == PLAY_AGAIN_EVENT:
                     # Start a new game loop and close the current one
                     self.running = False

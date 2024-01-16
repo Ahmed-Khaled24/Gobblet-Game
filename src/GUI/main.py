@@ -81,7 +81,7 @@ def set_game_difficulty(selected: Tuple, value: Any):
         difficulty = 25
 
 
-TYPE = None
+TYPE = 1
 
 
 def set_game_algorithm(selected: Tuple, value: Any):
