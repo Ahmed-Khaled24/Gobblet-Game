@@ -78,7 +78,7 @@ class Evaluation:
             has_large_piece = False
             piece_to_compare = pieces_for_another_color[0]
             for st in player_dominate.pieces:
-                if st[-1].size > piece_to_compare.size:
+                if st and st[-1].size > piece_to_compare.size:
                     has_large_piece = True
                     break
             if not has_large_piece:
