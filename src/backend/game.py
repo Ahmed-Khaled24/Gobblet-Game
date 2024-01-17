@@ -2,6 +2,7 @@ from copy import deepcopy
 import datetime
 from enum import Enum
 import math
+import random
 from time import sleep, time
 from typing import Tuple, Optional
 from src.backend.Eval import Evaluation
@@ -252,7 +253,6 @@ class Game:
                 move.piece.externalStackIndex,
                 isVirtualMove=True,
             )
-        ## if we handle the move piece, we need to add extra code here but نمشي نفسنا
         return newBoard
 
     def __evaluate(self, board: Board, player: AI, agent_turn) -> int:
@@ -289,12 +289,9 @@ class Game:
         
         return score
     
-
     def __order_moves(self, possible_moves, currentBoard, currentPlayer, agent_turn):
         # Order moves based on your existing evaluation function.
         return sorted(possible_moves, key=lambda move: self.__evaluate(currentBoard, currentPlayer, agent_turn), reverse=True)
-
-
 
     def alpha_beta_recursion(self, curr_depth, agent_turn, currentPlayer, currentBoard, alpha, beta, get_time_diff, max_time):
 
@@ -347,7 +344,6 @@ class Game:
         return result
 
    
-    
     def __gen_time_diff(self):
         start_time = time()
         def inner():
@@ -356,7 +352,7 @@ class Game:
             return diff
         return inner
 
-    def get_action(self, currentBoard: Board, currentPlayer: AI, maxDepth: int, maxTime: float) -> Tuple[int, Move]:
+    def get_action_iterative(self, currentBoard: Board, currentPlayer: AI, maxDepth: int, maxTime: float) -> Tuple[int, Move]:
         best_score = float('-inf')
         best_move = None
         get_time_diff = self.__gen_time_diff()
@@ -390,7 +386,9 @@ class Game:
 
             if current_best_score > best_score:
                 best_score = current_best_score
-                best_move = [action for action, score in actions_scores if score == current_best_score][0]
+                best_move = [action for action, score in actions_scores if score == current_best_score]
+                random.seed(time())
+                best_move = random.choice(best_move)
 
             # Check if time limit exceeded
             if get_time_diff() > maxTime:
@@ -403,6 +401,26 @@ class Game:
 
         return best_score, best_move
 
+    def get_action(
+            self, currentBoard: Board, currentPlayer: AI, maxDepth: int) -> Tuple[int, Move]:
+            timeDiff = self.__gen_time_diff()
+            actions_scores = []
+            possibleMoves = self.__getAvailableMoves(currentBoard, currentPlayer)
+            for legal_action in possibleMoves:
+                newBoard = self.__makeMove(currentBoard, legal_action)
+                nextPlayer = (
+                    self.player1
+                    if currentPlayer.color == self.player2.color
+                    else self.player2
+                )
+                score = self.alpha_beta_recursion(maxDepth - 1, self.MIN, nextPlayer, newBoard, alpha=-10e12, get_time_diff=timeDiff,
+                                                beta=10e12, max_time=20)
+                actions_scores.append((legal_action, score))
+            just_scores = [score for _, score in actions_scores]
+            best_score = max(just_scores)
+            best_actions = [action for action, score in actions_scores if score == best_score]
+            return best_score, best_actions[0]
+    
     def __minimax(
             self, currentBoard: Board, currentPlayer: AI, maxDepth: int, currentDepth: int
     ) -> Tuple[int, Move]:
@@ -412,7 +430,7 @@ class Game:
         possibleMoves = self.__getAvailableMoves(currentBoard,
                                                  currentPlayer)  ## If this returns empty list then this is a terminal state.
         if currentDepth == maxDepth or len(possibleMoves) == 0:
-            return self.__evaluate(currentBoard, currentPlayer), None
+            return self.__evaluate(currentBoard, currentPlayer, self.MAX if self.turn == currentPlayer.color else self.MIN), None
 
         ## Bubble up the best move
         bestMove = None
@@ -438,7 +456,7 @@ class Game:
 
         return bestScore, bestMove
 
-    def getBestMove(self, player: AI, TYPE, maxTime: int = 3) -> Move:
+    def getBestMove(self, player: AI, TYPE, maxTime: int = 5) -> Move:
         """This function is the interface for the minimax algorithm."""
         print(f'Player is: {player}')
         print(f'Player color is: {player.color}')
@@ -450,10 +468,17 @@ class Game:
             print(f'Best move is: {move} with score: {score}')
             return move
         if TYPE == 2:
-            # TODO: fix this to be addded dynamically from init here
+            # TODO: fix this to be added dynamically from init here
             score, move = self.get_action(
+                self.board, player, player.difficulty)  # maxDepth is the difficulty level
+            print(f'Best move is: {move} with score: {score}')
+            return move
+        if TYPE == 3:
+            score, move = self.get_action_iterative(
                 self.board, player, player.difficulty, maxTime)  # maxDepth is the difficulty level
             print(f'Best move is: {move} with score: {score}')
             return move
+
+
 
 

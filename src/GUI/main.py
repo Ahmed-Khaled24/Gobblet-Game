@@ -75,7 +75,7 @@ def show_start_screen():
         "Difficulty AI 2: ", [ ("Easy", 1), ("Hard", 2)], onchange=set_player2_difficulty
     )
     aivai.add.selector(
-        "Algorithm: ", [("MiniMax", 1), ("AlphaBeta", 2)], onchange=set_game_algorithm
+        "Algorithm: ", [("MiniMax", 1), ("AlphaBeta", 2), ("Iterative", 3)], onchange=set_game_algorithm
     )
     aivai.add.button("Play", lambda: game_loop(GameModes.AiVsAi))
 
@@ -89,7 +89,7 @@ def show_start_screen():
         "Difficulty AI: ", [("Easy", 1), ("Hard", 2)], onchange=set_player2_difficulty
     )
     aivh.add.selector(
-        "Algorithm: ", [("MiniMax", 1), ("AlphaBeta", 2)], onchange=set_game_algorithm
+        "Algorithm: ", [("MiniMax", 1), ("AlphaBeta", 2), ("Iterative", 3)], onchange=set_game_algorithm
     )
     aivh.add.button("Play", lambda: game_loop(GameModes.HumanVsAi))
     start_menu.mainloop(win)
@@ -101,14 +101,14 @@ def set_player1_difficulty(selected: Tuple, value: Any):
     if value == 1:
         player1Difficulty = 2
     elif value == 2:
-        player1Difficulty = 4
+        player1Difficulty = 5
 
 def set_player2_difficulty(selected: Tuple, value: Any):
     global player2Difficulty
     if value == 1:
         player2Difficulty = 2
     elif value == 2:
-        player2Difficulty = 4
+        player2Difficulty = 5
 
 
 
@@ -122,6 +122,8 @@ def set_game_algorithm(selected: Tuple, value: Any):
         TYPE = 1
     elif value == 2:
         TYPE = 2
+    elif value == 3:
+        TYPE = 3
 
 
 def game_loop(mode: GameModes):
