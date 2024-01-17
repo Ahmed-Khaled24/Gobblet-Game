@@ -18,7 +18,7 @@ class GameStatusBox:
         self.WHITE = (255, 255, 255)
         self.RED = (255, 0, 0)
         self.BLACK = (0, 0, 0)
-        self.GRAY = (200, 200, 200)
+        self.GRAY = (150, 150, 150)
 
         self.button_rect = None
 
@@ -32,6 +32,9 @@ class GameStatusBox:
         elif color == "R":
             color = self.RED
             button_color = self.RED
+        elif color == self.GRAY:
+            color = self.GRAY
+            button_color = self.GRAY
 
         box_width, box_height = self.WIDTH, self.HEIGHT
         screen_width, screen_height = self.screen.get_size()
@@ -49,8 +52,13 @@ class GameStatusBox:
         text_render = self.font.render(message, True, self.WHITE)
         text_rect = text_render.get_rect(center=(box_width // 2, box_height // 2))
         modal_surface.blit(text_render, text_rect.topleft)
+
         # Create "Play again" button
-        self.button_rect = pygame.Rect(100, 150, 100, 50)
+
+        self.button_rect = pygame.Rect(85, 125, 125, 50)
+        # Draw white border
+        pygame.draw.rect(modal_surface, (255, 255, 255), self.button_rect.inflate(5, 5))
+        # Draw button
         pygame.draw.rect(modal_surface, button_color, self.button_rect)
 
         # Add text to the button
@@ -74,7 +82,7 @@ class GameStatusBox:
 
                     # TODO: adjust button rect from modal to screen coordinates dynamically
                     # adjust button rect from modal to screen coordinates
-                    adjusted_rect = pygame.Rect(280, 300, 100, 50)
+                    adjusted_rect = pygame.Rect(280, 275, 100, 50)
 
                     if adjusted_rect.collidepoint(event.pos):
                         pygame.event.post(pygame.event.Event(PLAY_AGAIN_EVENT))
