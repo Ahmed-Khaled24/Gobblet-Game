@@ -4,6 +4,7 @@ from enum import Enum
 import math
 from time import sleep, time
 from typing import Tuple, Optional
+from src.backend.Eval import Evaluation
 from src.backend.board import Board
 from src.backend.Person import *
 from src.backend.player import Player
@@ -50,6 +51,8 @@ class Game:
             player2Name: str,
             player1Color: Color,
             player2Color: Color,
+            player1Difficulty: int,
+            player2Difficulty: int,
     ):
         self.memoization_table = {}
         self.board = Board()
@@ -61,10 +64,10 @@ class Game:
             self.player2 = Person(player2Color, player2Name)
         elif mode == GameModes.HumanVsAi:
             self.player1 = Person(player1Color, player1Name)
-            self.player2 = AI(player2Color, player2Name)
+            self.player2 = AI(player2Color, player2Name, player2Difficulty)
         elif mode == GameModes.AiVsAi:
-            self.player1 = AI(player1Color, player1Name)
-            self.player2 = AI(player2Color, player2Name)
+            self.player1 = AI(player1Color, player1Name, player1Difficulty)
+            self.player2 = AI(player2Color, player2Name, player2Difficulty)
         self.game_status: GameStatus = GameStatus.OnGame
         self.winner = None
 
@@ -252,7 +255,7 @@ class Game:
         ## if we handle the move piece, we need to add extra code here but نمشي نفسنا
         return newBoard
 
-    def __evaluate(self, board: Board, player: AI) -> int:
+    def __evaluate(self, board: Board, player: AI, agent_turn) -> int:
         """
         This is the static evaluation function (heuristic) for the minimax algorithm.
         It returns a number that represents the score of the current board state for the given player.
@@ -264,39 +267,43 @@ class Game:
             1. Add more points if the AI has three pieces in a row, column, or diagonal
             2. Subtract more points if the opponent has three pieces in a row, column, or diagonal
         """
-        score = 0
-        for row in board.grid:
-            for cell in row:
-                piece = cell[-1]
-                if piece is None:
-                    continue
-                if piece.color == player.color:
-                    score += 1
-                else:
-                    score -= 1
-
+        # score = 0
+        # for row in board.grid:
+        #     for cell in row:
+        #         piece = cell[-1]
+        #         if piece is None:
+        #             continue
+        #         if piece.color == player.color:
+        #             score += 1
+        #         else:
+        #             score -= 1
+        maximizer = None
+        minimizer = None
+        if agent_turn == self.MAX:
+            maximizer = player
+            minimizer = self.player1 if player == self.player2 else self.player2
+        else:
+            maximizer = self.player1 if player == self.player2 else self.player2
+            minimizer = player
+        score = Evaluation().heuristic_v2(board, minimizer, maximizer)
+        
         return score
     
 
-    def __order_moves(self, possible_moves, currentBoard, currentPlayer):
+    def __order_moves(self, possible_moves, currentBoard, currentPlayer, agent_turn):
         # Order moves based on your existing evaluation function.
-        return sorted(possible_moves, key=lambda move: self.__evaluate(currentBoard, currentPlayer), reverse=True)
+        return sorted(possible_moves, key=lambda move: self.__evaluate(currentBoard, currentPlayer, agent_turn), reverse=True)
 
 
 
     def alpha_beta_recursion(self, curr_depth, agent_turn, currentPlayer, currentBoard, alpha, beta, get_time_diff, max_time):
-        print('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&')
-        print(f'Current depth is: {curr_depth}')
-        print(f'Current player is: {currentPlayer}')
-        print(f'Current Time is {get_time_diff()}')
-        print('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&')
 
         if curr_depth == 0:  # reached a leaf  or  finished game
-            return self.__evaluate(currentBoard, currentPlayer)
+            return self.__evaluate(currentBoard, currentPlayer, agent_turn)
         possibleMoves = self.__getAvailableMoves(currentBoard, currentPlayer)
+        ordered_moves = self.__order_moves(possibleMoves, currentBoard, currentPlayer, agent_turn)
 
-        memo_key = (hash(currentBoard))
-
+        memo_key = (hash(currentBoard), curr_depth)
 
         # Check if the result is already memoized
         if memo_key in self.memoization_table:
@@ -304,7 +311,7 @@ class Game:
         
 
         if agent_turn == self.MAX:
-            for legal_action in possibleMoves:
+            for legal_action in ordered_moves:
                 newBoard = self.__makeMove(currentBoard, legal_action)
                 nextPlayer = (
                     self.player1
@@ -357,9 +364,9 @@ class Game:
         for depth in range(1, maxDepth + 1):
             actions_scores = []
             possible_moves = self.__getAvailableMoves(currentBoard, currentPlayer)
-            # ordered_moves = self.order_moves(possible_moves, currentBoard, currentPlayer)
+            ordered_moves = self.__order_moves(possible_moves, currentBoard, currentPlayer, self.MAX)
 
-            for legal_action in possible_moves:
+            for legal_action in ordered_moves:
                 newBoard = self.__makeMove(currentBoard, legal_action)
                 nextPlayer = (
                     self.player1
@@ -390,6 +397,9 @@ class Game:
                 break
         
         print(f'Best score is: {best_score}')
+
+        if len(self.memoization_table) > 4000:
+            self.memoization_table = {}
 
         return best_score, best_move
 
@@ -428,8 +438,12 @@ class Game:
 
         return bestScore, bestMove
 
-    def getBestMove(self, player: AI, TYPE) -> Move:
+    def getBestMove(self, player: AI, TYPE, maxTime: int = 3) -> Move:
         """This function is the interface for the minimax algorithm."""
+        print(f'Player is: {player}')
+        print(f'Player color is: {player.color}')
+        print(f'Player difficulty is: {player.difficulty}')
+        print(f'Max time is: {maxTime}')
         if TYPE == 1:
             score, move = self.__minimax(
                 self.board, player, player.difficulty, 0)  # maxDepth is the difficulty level
@@ -438,7 +452,7 @@ class Game:
         if TYPE == 2:
             # TODO: fix this to be addded dynamically from init here
             score, move = self.get_action(
-                self.board, player, 10, 4)  # maxDepth is the difficulty level
+                self.board, player, player.difficulty, maxTime)  # maxDepth is the difficulty level
             print(f'Best move is: {move} with score: {score}')
             return move
 

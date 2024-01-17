@@ -38,6 +38,8 @@ turns = {
     "WR": (myfont.size("RED WON"), myfont.render("RED WON!!", True, COLOURS["W"])),
 }
 
+player1Difficulty = 2
+player2Difficulty = 2
 
 def aivai_menu():
     start_menu._open(aivai)
@@ -67,10 +69,10 @@ def show_start_screen():
         theme=pygame_menu.themes.THEME_DARK,
     )
     aivai.add.selector(
-        "Difficulty AI 1: ", [("Hard", 1), ("Easy", 2)], onchange=set_game_difficulty
+        "Difficulty AI 1: ", [("Easy", 1), ("Hard", 2)], onchange=set_player1_difficulty
     )
     aivai.add.selector(
-        "Difficulty AI 2: ", [("Hard", 1), ("Easy", 2)], onchange=set_game_difficulty
+        "Difficulty AI 2: ", [ ("Easy", 1), ("Hard", 2)], onchange=set_player2_difficulty
     )
     aivai.add.selector(
         "Algorithm: ", [("MiniMax", 1), ("AlphaBeta", 2)], onchange=set_game_algorithm
@@ -84,7 +86,7 @@ def show_start_screen():
         theme=pygame_menu.themes.THEME_DARK,
     )
     aivh.add.selector(
-        "Difficulty AI: ", [("Hard", 1), ("Easy", 2)], onchange=set_game_difficulty
+        "Difficulty AI: ", [("Easy", 1), ("Hard", 2)], onchange=set_player2_difficulty
     )
     aivh.add.selector(
         "Algorithm: ", [("MiniMax", 1), ("AlphaBeta", 2)], onchange=set_game_algorithm
@@ -93,15 +95,22 @@ def show_start_screen():
     start_menu.mainloop(win)
 
 
-def set_game_difficulty(selected: Tuple, value: Any):
+
+def set_player1_difficulty(selected: Tuple, value: Any):
+    global player1Difficulty
     if value == 1:
-        difficulty = 25
+        player1Difficulty = 2
     elif value == 2:
-        difficulty = 50
-    elif value == 3:
-        difficulty = 100
-    else:
-        difficulty = 25
+        player1Difficulty = 4
+
+def set_player2_difficulty(selected: Tuple, value: Any):
+    global player2Difficulty
+    if value == 1:
+        player2Difficulty = 2
+    elif value == 2:
+        player2Difficulty = 4
+
+
 
 
 TYPE = 1
@@ -116,7 +125,11 @@ def set_game_algorithm(selected: Tuple, value: Any):
 
 
 def game_loop(mode: GameModes):
-    game = Game(mode, "Player1", "Player2", Color.WHITE, Color.BLACK)
+    global player1Difficulty
+    global player2Difficulty
+    print(f"Player1 Difficulty: {player1Difficulty}")
+    print(f"Player2 Difficulty: {player2Difficulty}")
+    game = Game(mode, "Player1", "Player2", Color.WHITE, Color.BLACK, player1Difficulty, player2Difficulty)
     gui = GUI()
     gui.on_execute(game, mode, TYPE)
 
