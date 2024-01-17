@@ -15,6 +15,21 @@ he wins — except in one case: If you lift your piece and reveal an opponent's 
 finishes a four-in-a-row, you don't immediately lose; you can't return the piece to its
 starting location, but if you can place it over one of the opponent's three other pieces in
 that row, the game continues..
+
+  ## Assumptions
+   1. The game assumes that the RED pieces always start first.
+   2. In the Human VS AI mode, the AI plays with the black pieces, and the human player plays with the RED pieces.
+  ## Features 
+  The Game has three modes to choose from:
+    1. Human VS Human
+    2. Human VS AI 
+    3. AI VS AI 
+  ## Algorithms Used 
+    - Minimax algorithm:
+    - Alpha-beta pruning:
+    - Alpha-beta pruning iterative deeping:
+    
+   
 # Project Directory Structure:
 
 This is a simplified representation of a project directory structure for a data science project.
@@ -106,4 +121,4 @@ This guide provides steps for dealing with the `requirements.txt` file in your P
 
 # Technologies Used
 - **Python**
-- **Pygame**: A set of Python modules designed for writing video games. It provides the functionality we need for creating GUI applications. 
+- **Pygame** 
