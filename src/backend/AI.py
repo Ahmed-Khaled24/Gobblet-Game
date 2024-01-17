@@ -5,7 +5,7 @@ from uuid import uuid1
 
 
 class AI(Player):
-    def __init__(self, color: Color, name, difficulty: int = 2 ):
+    def __init__(self, color: Color, name, difficulty: int = 2):
         Player.__init__(self, color)
         self.name = name
         self.icon = None

@@ -15,7 +15,7 @@ class Board:
     def to_tuple(self):
         # Convert the board to a tuple of tuples
         return tuple(tuple(tuple(cell) for cell in row) for row in self.grid)
-    
+
     def __hash__(self):
         # Convert the grid to a tuple of tuples and hash it
         return hash(tuple(tuple(tuple(cell) for cell in row) for row in self.grid))

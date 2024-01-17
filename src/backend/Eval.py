@@ -14,14 +14,14 @@ class Evaluation:
 
     def heuristic_v2(self, board: Board, minimizer: Player, maximizer: Player):
         """
-                    if direction consists only of SINGLE COLOR:
-                        - each empty field Scored 1
-                        - For each piece multiple with 10 or any number
+        if direction consists only of SINGLE COLOR:
+            - each empty field Scored 1
+            - For each piece multiple with 10 or any number
 
-                    if there exists MIXED COLORS in the direction:
-                     - size of Pieces of MIN player < #Pieces of MAX outside the board
-                        do the same as above
-                     - otherwise 0 rate
+        if there exists MIXED COLORS in the direction:
+         - size of Pieces of MIN player < #Pieces of MAX outside the board
+            do the same as above
+         - otherwise 0 rate
         """
         self.min, self.max = minimizer, maximizer
         self.board = board
@@ -73,7 +73,9 @@ class Evaluation:
             if num_black == num_white:
                 return 0
 
-            pieces_for_another_color = [piece for piece in pieces if piece and piece.color != color_dominate]
+            pieces_for_another_color = [
+                piece for piece in pieces if piece and piece.color != color_dominate
+            ]
             player_dominate = self.max if self.max.color == color_dominate else self.min
             has_large_piece = False
             piece_to_compare = pieces_for_another_color[0]
@@ -131,7 +133,7 @@ class Evaluation:
         return count_w, count_b
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass
     # eval = Evaluation()
     # board = Board()
