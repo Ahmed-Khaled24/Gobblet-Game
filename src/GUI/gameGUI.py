@@ -3,7 +3,7 @@ import pygame
 
 from src.GUI.status_box import GameStatusBox
 from src.backend.game import Game, GameModes, GameStatus
-from human_agent import Human
+from src.GUI.human_agent import Human
 from src.utils.move import MoveType
 
 BOARD_SIZE = 4

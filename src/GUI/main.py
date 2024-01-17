@@ -4,15 +4,15 @@ from pygame.locals import *
 
 # sys.path.insert(0, os.path.abspath('../.'))
 # TODO: remake this if it works for everybody but me
-path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
-print(path)
-sys.path.insert(0, path)
+# path = os.path.abspath(os.path.join("E:/Ahmed/College/5. Senior 2 CSE/1st term/AI/Project/Code"))
+# print(path)
+# sys.path.insert(0, path)
 
 import pygame
 import pygame_menu
 from src.backend.player import Color
 from typing import Tuple, Any
-from gameGUI import GUI
+from src.GUI.gameGUI import GUI
 from src.backend.game import Game, GameModes
 
 pygame.init()
