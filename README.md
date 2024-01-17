@@ -21,14 +21,21 @@ that row, the game continues..
    2. In the Human VS AI mode, the AI plays with the black pieces, and the human player plays with the RED pieces.
   ## Features 
   The Game has three modes to choose from:
-    1. Human VS Human
-    2. Human VS AI 
-    3. AI VS AI 
+    -**Human VS Human**: 
+     This mode provides a multiplayer experience where two human players can play against each other. 
+    -**Human VS AI**: 
+     In this mode, a human player can play against an AI. The difficulty level and algorithm used by the AI can be selected.
+    -**AI VS AI**: 
+     This mode allows users to observe the gameplay between two AI opponents. The difficulty level for each AI player can be adjusted.
+
   ## Algorithms Used 
-    - Minimax algorithm:
-    - Alpha-beta pruning:
-    - Alpha-beta pruning iterative deeping:
-    
+    - Minimax algorithm: This algorithm explores all possible moves and evaluates the board state to make optimal decisions.
+    - Alpha-beta pruning: This algorithm enhances the minimax algorithm by reducing the number of nodes evaluated, resulting in faster decision-making.
+    - Alpha-beta pruning iterative deeping: This algorithm further improves the alpha-beta pruning by performing iterative deepening, which allows for more efficient searching of the game tree.
+   ## Difficulty levels
+   The game supports two difficulty levels:
+   - Easy: This level has a depth of 2 in the search tree, making it less challenging for players.
+   - Hard: This level has a depth of 5 in the search tree, providing a greater challenge for players. At this level, the AI is expected to make more optimal moves and can be difficult to beat.    
    
 # Project Directory Structure:
 
