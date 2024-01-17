@@ -95,3 +95,15 @@ This guide provides steps for dealing with the `requirements.txt` file in your P
     ```bash 
     conda deactiavte
     ```
+# Contributor
+
+| Team Member  | ID | Contribution |
+| :---         |     :---:  | --- |
+| Youmna Mahmoud  | 1901008 |   |
+| Ahmed Khaled  | 1901275 |   |
+| Omar Fahmy  | 1901299 |   |
+| Ahmed Elsayed  | 1900730  |   |
+
+# Technologies Used
+- **Python**
+- **Pygame**: A set of Python modules designed for writing video games. It provides the functionality we need for creating GUI applications. 
