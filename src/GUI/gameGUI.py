@@ -106,6 +106,31 @@ class GUI:
     def cleanup(self):
         pygame.quit()
 
+    def __handle_game_status_check(self, game: Game):
+        game.statusCheck()
+        if game.game_status == GameStatus.Win:
+            print("Winner is:")
+            print(self.game.winner.color.value)
+            try:
+                screen = pygame.display.get_surface()
+                GameStatusBox(screen).draw_winner_box(
+                    game.winner.color.value, game.winner.name
+                )
+            except Exception as e:
+                print("Error in WinnerBox")
+                print(e)
+        elif game.game_status == GameStatus.Draw:
+            print("Draw")
+            try:
+                screen = pygame.display.get_surface()
+                GameStatusBox(screen).draw_draw_box()
+            except Exception as e:
+                print("Error in DrawBox")
+                print(e)
+        else:
+            # Continue the game
+            pass
+
     def on_execute(self, game: Game, mode: GameModes, TYPE):
         global event
         if self.on_init() == False:
@@ -140,6 +165,7 @@ class GUI:
                                 newRow=legal_action.row,
                                 newColumn=legal_action.column
                             )
+                    self.__handle_game_status_check(game)
 
             elif mode == GameModes.AiVsAi:
                 if self.game.turn.value == "R":
@@ -160,18 +186,5 @@ class GUI:
                         legal_action.piece,
                         legal_action.piece.externalStackIndex,
                     )
-                self.game.statusCheck()
-                print(self.game.game_status)
-                if self.game.game_status == GameStatus.Win:
-                    print("Winner is:")
-                    print(self.game.winner.color.value)
-                    try:
-                        screen = pygame.display.get_surface()
-                        GameStatusBox(screen).draw_winner_box(
-                            game.winner.color.value, game.winner.name
-                        )
-                    except Exception as e:
-                        print("Error in WinnerBox")
-                        print(e)
-                elif game.game_status == GameStatus.Draw:
-                    pass
+            self.__handle_game_status_check(game)
+               
