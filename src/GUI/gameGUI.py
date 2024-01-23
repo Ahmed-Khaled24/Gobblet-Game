@@ -1,5 +1,6 @@
 from time import sleep
 import pygame
+from src.GUI.ai_agent import AiAgent
 
 from src.GUI.status_box import GameStatusBox
 from src.backend.game import Game, GameModes, GameStatus
@@ -20,6 +21,7 @@ class GUI:
         self.selected = False
         self.Human = Human()
         self.game = None
+        self.Ai = None
         self.myfont = pygame.font.SysFont("monospace", 28)
         self.turns = {
             "R": (
@@ -131,15 +133,15 @@ class GUI:
             except Exception as e:
                 print("Error in DrawBox")
                 print(e)
-        else:
+
             # Continue the game
-            pass
 
     def on_execute(self, game: Game, mode: GameModes, TYPE):
         global event
         if self.on_init() == False:
             self._running = False
         self.game = game
+        self.Ai = AiAgent(game)
         while self._running:
             self.render()
             for event in pygame.event.get():
@@ -153,57 +155,9 @@ class GUI:
                     self.on_loop()
                 elif self.game.turn.value == "B":
                     self.selected = False
-                    legal_action = self.game.getBestMove(self.game.player2, TYPE)
-                    print(f"Legal Action: {legal_action}")
-                    if legal_action.type == MoveType.ADD:
-                        self.game.addGobblet(
-                            legal_action.row,
-                            legal_action.column,
-                            legal_action.piece,
-                            legal_action.piece.externalStackIndex,
-                        )
-                    elif legal_action.type == MoveType.MOVE:
-                        self.game.moveGobblet(
-                            oldRow=legal_action.piece.cur_pos[0],
-                            oldColumn=legal_action.piece.cur_pos[1],
-                            newRow=legal_action.row,
-                            newColumn=legal_action.column,
-                        )
-                    self.__handle_game_status_check(game)
+                    self.Ai.on_turn(TYPE)
 
             elif mode == GameModes.AiVsAi:
-                if self.game.turn.value == "R":
-                    legal_action = self.game.getBestMove(self.game.player1, TYPE)
-                    if legal_action.type == MoveType.ADD:
-                        self.game.addGobblet(
-                            legal_action.row,
-                            legal_action.column,
-                            legal_action.piece,
-                            legal_action.piece.externalStackIndex,
-                        )
-                    elif legal_action.type == MoveType.MOVE:
-                        self.game.moveGobblet(
-                            oldRow=legal_action.piece.cur_pos[0],
-                            oldColumn=legal_action.piece.cur_pos[1],
-                            newRow=legal_action.row,
-                            newColumn=legal_action.column,
-                        )
-
-                elif self.game.turn.value == "B":
-                    pygame.time.delay(1000)
-                    legal_action = self.game.getBestMove(self.game.player2, TYPE)
-                    if legal_action.type == MoveType.ADD:
-                        self.game.addGobblet(
-                            legal_action.row,
-                            legal_action.column,
-                            legal_action.piece,
-                            legal_action.piece.externalStackIndex,
-                        )
-                    elif legal_action.type == MoveType.MOVE:
-                        self.game.moveGobblet(
-                            oldRow=legal_action.piece.cur_pos[0],
-                            oldColumn=legal_action.piece.cur_pos[1],
-                            newRow=legal_action.row,
-                            newColumn=legal_action.column,
-                        )
+                self.Ai.on_turn(TYPE)
+                
             self.__handle_game_status_check(game)
