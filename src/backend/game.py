@@ -289,14 +289,13 @@ class Game:
         #             score += 1
         #         else:
         #             score -= 1
-        maximizer = None
-        minimizer = None
-        if agent_turn == self.MAX:
-            maximizer = player
-            minimizer = self.player1 if player == self.player2 else self.player2
-        else:
-            maximizer = self.player1 if player == self.player2 else self.player2
-            minimizer = player
+        maximizer = self.player1 if self.player1.color.value == self.turn.value else self.player2
+        minimizer = self.player1 if maximizer == self.player2 else self.player2
+        print('########################')
+        print(f'Maximizer is: {maximizer}')
+        print(f'Minimizer is: {minimizer}')
+        print('########################')
+
         score = Evaluation().heuristic_v2(board, minimizer, maximizer)
 
         return score
@@ -420,7 +419,7 @@ class Game:
                 )
                 score = self.alpha_beta_recursion(
                     depth - 1,
-                    self.MIN,
+                    self.MAX,
                     nextPlayer,
                     newBoard,
                     alpha=float("-inf"),
@@ -477,7 +476,7 @@ class Game:
             )
             score = self.alpha_beta_recursion(
                 maxDepth - 1,
-                self.MIN,
+                self.MAX,
                 nextPlayer,
                 newBoard,
                 alpha=-10e12,
