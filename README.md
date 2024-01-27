@@ -104,8 +104,47 @@ Here's an overview of the key functions in the Alpha-beta pruning:
    - **Easy**: This level has a depth of 2 in the search tree, making it less challenging for players.
      
    - **Hard**: This level has a depth of 5 in the search tree, providing a greater challenge for players. At this level, the AI is expected to make more optimal moves and can be difficult to beat.
-      
-# Contributor
+## Heuristics
+### Description:
+The function selects rows by which four can be placed in a row. These are all vertical, horizontal and both diagonals. For each type, its figures are checked separately, then they are evaluated accordingly and added to the total score of the board. The score of a row consists of its piece weight, which is represented by the size of the piece and the number of pieces of one player in that row. The sign of the score of one type determines whether it is a MAX player or for the MIN player. The MAX has a positive sign, MIN has negative. Thus, after the final calculated score, based on the sign, we can see which player, according to our estimation, should win this board.
+### Evaluation Flow:
+
+1. If there are 4 pieces for the MAX player in any direction, the game ends, and the score is the maximum positive value.
+
+2. If there are 4 pieces for the MIN player in any direction, the game ends, and the score is the minimum negative value.
+
+3. **Case I: Direction contains only pieces of the same color.**
+    - Each empty field will have a score equal to 1.
+    - If the cell is not empty, the score will be equal to Size of the piece * 10.
+    - Size of pieces is one of these integers (1,2,3,4).
+    - Finally, cumulate each cell by multiplication, and the sign of the final score is according to the color of MIN or MAX player.
+
+4. **Case II: Direction has different pieces in color.**
+    - If the direction has the same number of pieces, the score is 0; no advantages for one player over the other.
+    - If the direction does not have the same number of pieces:
+        - Check if the player with more pieces also has bigger pieces in the external stack than the other player's pieces in the same direction.
+        - If yes, calculate the score as in Case I, considering the pieces of the other player as empty cells.
+        - Otherwise, the score of the direction is 0.
+
+### Example
+<img src="https://github.com/Ahmed-Khaled24/Gobblet-Game/assets/88388782/4a5f28c7-382f-4a35-b574-b5f53f787b60" alt="image" width="600" height="600"/></br>
+Black is maximizer and white is the minimizer. 
+| Direction        | Black        | White       |
+|------------------|--------------|-------------|
+| Vertical 1       | 0            | 0           |
+| Vertical 2       | 0            | 0           |
+| Vertical 3       | 1 * 40 * 40 * 1 | 0           |
+| Vertical 4       | 30 * 1 * 1 * 1 | 0           |
+| Horizontal 1     | 40 * 30 * 1 * 1 | 0           |
+| Horizontal 2     | 1 * 40 * 1 * 1 | 0           |
+| Horizontal 3     | 0            | 0           |
+| Horizontal 4     | 0            | -40 * 1 * 1 * 1 |
+| Left Diagonal    | 40 * 40 * 1 * 1 | 0           |
+| Right Diagonal   | 0            | 0           |
+
+Total score = 40 * 40 + 30 + 40* 30 + 40 - 40 + 40*40 = 98100 
+
+## Contributor
 
 | Team Member  | ID | 
 | :---         |     :---:  | 
